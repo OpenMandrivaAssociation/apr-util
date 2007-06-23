@@ -4,7 +4,7 @@
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
 Version:	1.2.8
-Release:	%mkrel 4
+Release:	%mkrel 5
 License:	Apache License
 Group:		System/Libraries
 URL:		http://apr.apache.org/
@@ -144,11 +144,7 @@ cat >> config.layout << EOF
 EOF
 
 %build
-%if %mdkversion >= 200710
-export CFLAGS="%{optflags} -fstack-protector"
-export CXXFLAGS="%{optflags} -fstack-protector"
-export FFLAGS="%{optflags} -fstack-protector"
-%endif
+%serverbuild
 
 # We need to re-run ./buildconf because of any applied patch(es)
 #./buildconf --with-apr=%{_prefix}
