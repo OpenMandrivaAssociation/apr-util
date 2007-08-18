@@ -1,10 +1,11 @@
-%define apuver	1
-%define libname	%mklibname apr-util %{apuver}
+%define apuver 1
+%define libname %mklibname apr-util %{apuver}
+%define libname %mklibname -d apr-util
 
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
 Version:	1.2.8
-Release:	%mkrel 5
+Release:	%mkrel 6
 License:	Apache License
 Group:		System/Libraries
 URL:		http://apr.apache.org/
@@ -20,19 +21,19 @@ Patch3:		apr-util-1.2.8-no_linkage.diff
 Patch4:		apr-util-1.2.7-dso.diff
 Patch5:		apr-util-1.2.7-link.diff
 Patch6:		apr-util-1.2.7-apr_dbd_mysql_headers.diff
-BuildPrereq:	autoconf2.5
-BuildPrereq:	automake1.7
-BuildPrereq:	libtool
-BuildPrereq:	doxygen
-BuildPrereq:	apr-devel >= 1.2.8
-BuildPrereq:	openldap-devel
-BuildPrereq:	db4-devel
-BuildPrereq:	expat-devel
-BuildPrereq:	openssl-devel
-BuildPrereq:	MySQL-devel
-BuildPrereq:	postgresql-devel
-BuildPrereq:	sqlite3-devel
-BuildPrereq:	python
+BuildRequires:	autoconf2.5
+BuildRequires:	automake1.7
+BuildRequires:	libtool
+BuildRequires:	doxygen
+BuildRequires:	apr-devel >= 1.2.8
+BuildRequires:	openldap-devel
+BuildRequires:	db4-devel
+BuildRequires:	expat-devel
+BuildRequires:	openssl-devel
+BuildRequires:	MySQL-devel
+BuildRequires:	postgresql-devel
+BuildRequires:	sqlite3-devel
+BuildRequires:	python
 %if %mdkversion >= 1020
 BuildRequires:	multiarch-utils >= 1.0.3
 %endif
@@ -89,7 +90,7 @@ Requires:	%{libname} = %{version}-%{release}
 %description	dbd-sqlite3
 DBD driver for SQLite 3.
 
-%package -n	%{libname}-devel
+%package -n	%{develname}
 Group:		Development/C
 Summary:	APR utility library development kit
 Requires:	%{name} = %{version}
@@ -99,11 +100,12 @@ Requires:	apr-devel
 Requires:	openldap-devel
 #Requires:	db4-devel
 Requires:	expat-devel
-Provides:	lib%{name}-devel = %{version}
+Provides:	%{libname}-devel = %{version}
+Obsoletes:	%{libname}-devel
 Provides:	%{name}-devel = %{version}
-Obsoletes:	lib%{name}-devel %{name}-devel
+Obsoletes:	%{name}-devel
 
-%description -n	%{libname}-devel
+%description -n	%{develname}
 This package provides the support files which can be used to 
 build applications using the APR utility library.  The mission 
 of the Apache Portable Runtime (APR) is to provide a free 
@@ -251,7 +253,7 @@ rm -f %{buildroot}%{_libdir}/aprutil.exp
 %doc CHANGES LICENSE
 %{_libdir}/libaprutil-%{apuver}.so.*
 
-%files -n %{libname}-devel
+%files -n %{develname}
 %defattr(-,root,root,-)
 %doc --parents html
 %attr(755,root,root) %{_bindir}/apu-%{apuver}-config
@@ -275,5 +277,3 @@ rm -f %{buildroot}%{_libdir}/aprutil.exp
 %files dbd-sqlite3
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/apr_dbd_sqlite3.so
-
-
