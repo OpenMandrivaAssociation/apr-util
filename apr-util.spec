@@ -1,11 +1,11 @@
 %define apuver 1
 %define libname %mklibname apr-util %{apuver}
-%define libname %mklibname -d apr-util
+%define develname %mklibname -d apr-util
 
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
 Version:	1.2.8
-Release:	%mkrel 6
+Release:	%mkrel 7
 License:	Apache License
 Group:		System/Libraries
 URL:		http://apr.apache.org/
