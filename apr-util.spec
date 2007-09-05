@@ -4,8 +4,8 @@
 
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
-Version:	1.2.8
-Release:	%mkrel 7
+Version:	1.2.10
+Release:	%mkrel 0.1
 License:	Apache License
 Group:		System/Libraries
 URL:		http://apr.apache.org/
@@ -15,7 +15,6 @@ Source1:	http://www.apache.org/dist/apr/apr-util-%{version}.tar.gz.asc
 # http://apache.webthing.com/svn/apache/apr/apr_dbd_mysql.c
 Source2:	apr_dbd_mysql.c
 Patch0:		apr-util-1.2.2-config.diff
-Patch1:		apr-util-0.9.5-lib64.diff
 Patch2:		apr-util-postgresql.diff
 Patch3:		apr-util-1.2.8-no_linkage.diff
 Patch4:		apr-util-1.2.7-dso.diff
@@ -115,7 +114,6 @@ library of C data structures and routines.
 
 %setup -q -n %{name}-%{version}
 %patch0 -p0 -b .config
-%patch1 -p0 -b .lib64
 %patch2 -p1 -b .postgresql
 %patch3 -p0 -b .exports
 %patch4 -p0 -b .dso
