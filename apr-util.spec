@@ -4,7 +4,7 @@
 
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
-Version:	1.2.10
+Version:	1.2.12
 Release:	%mkrel 1
 License:	Apache License
 Group:		System/Libraries
@@ -24,12 +24,12 @@ BuildRequires:	autoconf2.5
 BuildRequires:	automake1.7
 BuildRequires:	libtool
 BuildRequires:	doxygen
-BuildRequires:	apr-devel >= 1.2.8
+BuildRequires:	apr-devel >= 1.2.12
 BuildRequires:	openldap-devel
 BuildRequires:	db4-devel
 BuildRequires:	expat-devel
 BuildRequires:	openssl-devel
-BuildRequires:	MySQL-devel
+BuildRequires:	mysql-devel
 BuildRequires:	postgresql-devel
 BuildRequires:	sqlite3-devel
 BuildRequires:	python
@@ -43,11 +43,6 @@ The mission of the Apache Portable Runtime (APR) is to provide a
 free library of C data structures and routines.  This library
 contains additional utility interfaces for APR; including support
 for XML, LDAP, database interfaces, URI parsing and more.
-
-You can build %{name} with some conditional build swithes;
-
-(ie. use with rpm --rebuild):
-    --with debug	Compile with debugging code (disabled)
 
 %package -n	%{libname}
 Summary:	Apache Portable Runtime Utility library
@@ -265,7 +260,7 @@ rm -f %{buildroot}%{_libdir}/aprutil.exp
 
 %files dbd-mysql
 %defattr(644,root,root,755)
-%doc INSTALL.MySQL LICENSE.apr_dbd_mysql
+%doc LICENSE.apr_dbd_mysql
 %attr(755,root,root) %{_libdir}/apr_dbd_mysql.so
 
 %files dbd-pgsql
