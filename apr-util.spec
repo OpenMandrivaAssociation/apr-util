@@ -36,7 +36,6 @@ BuildRequires:	python
 %if %mdkversion >= 1020
 BuildRequires:	multiarch-utils >= 1.0.3
 %endif
-BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description
 The mission of the Apache Portable Runtime (APR) is to provide a
