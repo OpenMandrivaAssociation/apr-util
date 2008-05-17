@@ -5,7 +5,7 @@
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
 Version:	1.2.12
-Release:	%mkrel 4
+Release:	%mkrel 5
 License:	Apache License
 Group:		System/Libraries
 URL:		http://apr.apache.org/
@@ -94,9 +94,9 @@ Requires:	apr-devel
 Requires:	openldap-devel
 #Requires:	db4-devel
 Requires:	expat-devel
-Provides:	%{libname}-devel = %{version}
-Obsoletes:	%{libname}-devel
-Provides:	%{name}-devel = %{version}
+Provides:	%{mklibname apr-util -d 1} = %{version}-%{release}
+Obsoletes:	%{mklibname apr-util -d 1}
+Provides:	%{name}-devel = %{version}-%{release}
 Obsoletes:	%{name}-devel
 
 %description -n	%{develname}
@@ -206,7 +206,7 @@ libtool --mode=link --tag=CC %{__cc} -rpath %{_libdir} -avoid-version -module db
 # popd
 
 %install
-[ -n "%{buildroot}" -a "%{buildroot}" != / ] && rm -rf %{buildroot}
+rm -rf %{buildroot}
 
 %makeinstall_std
 
@@ -239,7 +239,7 @@ rm -f %{buildroot}%{_libdir}/aprutil.exp
 %postun -n %{libname} -p /sbin/ldconfig
 
 %clean
-[ -n "%{buildroot}" -a "%{buildroot}" != / ] && rm -rf %{buildroot}
+rm -rf %{buildroot}
 
 %files -n %{libname}
 %defattr(-,root,root,-)
