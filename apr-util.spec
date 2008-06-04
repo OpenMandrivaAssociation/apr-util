@@ -4,38 +4,29 @@
 
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
-Version:	1.2.12
-Release:	%mkrel 6
+Version:	1.3.0
+Release:	%mkrel 0.1
 License:	Apache License
 Group:		System/Libraries
 URL:		http://apr.apache.org/
 Source0:	http://www.apache.org/dist/apr/apr-util-%{version}.tar.gz
 Source1:	http://www.apache.org/dist/apr/apr-util-%{version}.tar.gz.asc
-# http://apache.webthing.com/database/apr_dbd_mysql.c
-# http://apache.webthing.com/svn/apache/apr/apr_dbd_mysql.c
-Source2:	apr_dbd_mysql.c
 Patch0:		apr-util-1.2.2-config.diff
-Patch2:		apr-util-postgresql.diff
-Patch3:		apr-util-1.2.8-no_linkage.diff
-Patch4:		apr-util-1.2.7-dso.diff
-Patch5:		apr-util-1.2.7-link.diff
-Patch6:		apr-util-1.2.7-apr_dbd_mysql_headers.diff
+Patch1:		apr-util-1.2.7-link.diff
+BuildRequires:	apr-devel >= 1.3.0
 BuildRequires:	autoconf2.5
 BuildRequires:	automake1.7
-BuildRequires:	libtool
-BuildRequires:	doxygen
-BuildRequires:	apr-devel >= 1.2.12
-BuildRequires:	openldap-devel
 BuildRequires:	db4-devel
+BuildRequires:	doxygen
 BuildRequires:	expat-devel
-BuildRequires:	openssl-devel
+BuildRequires:	freetds_mssql-devel
+BuildRequires:	libtool
 BuildRequires:	mysql-devel
+BuildRequires:	openldap-devel
+BuildRequires:	openssl-devel
 BuildRequires:	postgresql-devel
-BuildRequires:	sqlite3-devel
 BuildRequires:	python
-%if %mdkversion >= 1020
-BuildRequires:	multiarch-utils >= 1.0.3
-%endif
+BuildRequires:	sqlite3-devel
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description
@@ -56,6 +47,15 @@ The mission of the Apache Portable Runtime (APR) is to provide a
 free library of C data structures and routines.  This library
 contains additional utility interfaces for APR; including support
 for XML, LDAP, database interfaces, URI parsing and more.
+
+%package	dbd-ldap
+Summary:	DBD driver for OpenLDAP
+Group:		System/Libraries
+License:	Apache License
+Requires:	%{libname} = %{version}-%{release}
+
+%description	dbd-ldap
+DBD driver for OpenLDAP.
 
 %package	dbd-pgsql
 Summary:	DBD driver for PostgreSQL
@@ -92,7 +92,6 @@ Requires:	%{libname} = %{version}-%{release}
 Requires:	apr-util = %{version}
 Requires:	apr-devel
 Requires:	openldap-devel
-#Requires:	db4-devel
 Requires:	expat-devel
 Provides:	%{mklibname apr-util -d 1} = %{version}-%{release}
 Obsoletes:	%{mklibname apr-util -d 1}
@@ -109,14 +108,7 @@ library of C data structures and routines.
 
 %setup -q -n %{name}-%{version}
 %patch0 -p0 -b .config
-%patch2 -p1 -b .postgresql
-%patch3 -p0 -b .exports
-%patch4 -p0 -b .dso
-%patch5 -p0 -b .link
-
-cp %{SOURCE2} dbd/apr_dbd_mysql.c
-%patch6 -p0 -b .mysql_headers
-head -46 dbd/apr_dbd_mysql.c > LICENSE.apr_dbd_mysql
+%patch1 -p0 -b .link
 
 cat >> config.layout << EOF
 <Layout NUX>
@@ -178,41 +170,21 @@ EOF
     --without-sqlite2 \
     --with-sqlite3=%{_prefix} \
     --with-berkeley-db \
-    --without-gdbm
+    --without-gdbm \
+    --without-oracle \
+    --without-freetds
 
 %make
 make dox
 
-%{__make} dbd/apr_dbd_mysql.lo
-libtool --mode=link --tag=CC %{__cc} -rpath %{_libdir} -avoid-version -module dbd/apr_dbd_mysql.lo -lmysqlclient_r -o dbd/apr_dbd_mysql.la
-
-%{__make} dbd/apr_dbd_pgsql.lo
-libtool --mode=link --tag=CC %{__cc} -rpath %{_libdir} -avoid-version -module dbd/apr_dbd_pgsql.lo -lpq -o dbd/apr_dbd_pgsql.la
-
-%{__make} dbd/apr_dbd_sqlite3.lo
-libtool --mode=link --tag=CC %{__cc} -rpath %{_libdir} -avoid-version -module dbd/apr_dbd_sqlite3.lo -lsqlite3 -o dbd/apr_dbd_sqlite3.la
-
-#pushd test
-#    make check
-#popd
-
-# Run the less verbose test suites
-# pushd test
-# make testall testrmm testdbm
-# ./testall -v -q
-# ./testrmm
-# ./testdbm auto tsdbm
-# ./testdbm -tDB auto tbdb.db
-# popd
+pushd test
+    make check
+popd
 
 %install
 rm -rf %{buildroot}
 
 %makeinstall_std
-
-libtool --mode=install %{_bindir}/install -c -m 755 dbd/apr_dbd_mysql.la %{buildroot}%{_libdir}
-libtool --mode=install %{_bindir}/install -c -m 755 dbd/apr_dbd_pgsql.la %{buildroot}%{_libdir}
-libtool --mode=install %{_bindir}/install -c -m 755 dbd/apr_dbd_sqlite3.la %{buildroot}%{_libdir}
 
 # Documentation
 rm -rf html; cp -rp docs/dox/html html
@@ -245,28 +217,30 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 %doc CHANGES LICENSE
 %{_libdir}/libaprutil-%{apuver}.so.*
+%dir %{_libdir}/apr-util-%{apuver}
 
 %files -n %{develname}
 %defattr(-,root,root,-)
 %doc --parents html
-%attr(755,root,root) %{_bindir}/apu-%{apuver}-config
+%attr(0755,root,root) %{_bindir}/apu-%{apuver}-config
+%{_includedir}/apr-%{apuver}/*.h
 %{_libdir}/libaprutil-%{apuver}.*a
 %{_libdir}/libaprutil-%{apuver}.so
-%{_libdir}/apr_dbd_mysql.*a
-%{_libdir}/apr_dbd_pgsql.*a
-%{_libdir}/apr_dbd_sqlite3.*a
+%{_libdir}/apr-util-%{apuver}/apr_*.*a
 %{_libdir}/pkgconfig/*.pc
-%{_includedir}/apr-%{apuver}/*.h
+
+%files dbd-ldap
+%defattr(0644,root,root,0755)
+%attr(0755,root,root) %{_libdir}/apr-util-%{apuver}/apr_ldap*.so
 
 %files dbd-mysql
-%defattr(644,root,root,755)
-%doc LICENSE.apr_dbd_mysql
-%attr(755,root,root) %{_libdir}/apr_dbd_mysql.so
+%defattr(0644,root,root,0755)
+%attr(0755,root,root) %{_libdir}/apr-util-%{apuver}/apr_dbd_mysql*.so
 
 %files dbd-pgsql
-%defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/apr_dbd_pgsql.so
+%defattr(0644,root,root,0755)
+%attr(0755,root,root) %{_libdir}/apr-util-%{apuver}/apr_dbd_pgsql*.so
 
 %files dbd-sqlite3
-%defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/apr_dbd_sqlite3.so
+%defattr(0644,root,root,0755)
+%attr(0755,root,root) %{_libdir}/apr-util-%{apuver}/apr_dbd_sqlite3*.so
