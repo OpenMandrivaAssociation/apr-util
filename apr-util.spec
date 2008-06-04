@@ -5,7 +5,7 @@
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
 Version:	1.3.0
-Release:	%mkrel 0.1
+Release:	%mkrel 0.2
 License:	Apache License
 Group:		System/Libraries
 URL:		http://apr.apache.org/
@@ -19,7 +19,6 @@ BuildRequires:	automake1.7
 BuildRequires:	db4-devel
 BuildRequires:	doxygen
 BuildRequires:	expat-devel
-BuildRequires:	freetds_mssql-devel
 BuildRequires:	libtool
 BuildRequires:	mysql-devel
 BuildRequires:	openldap-devel
