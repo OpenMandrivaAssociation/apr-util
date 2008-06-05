@@ -13,6 +13,7 @@ Source0:	http://www.apache.org/dist/apr/apr-util-%{version}.tar.gz
 Source1:	http://www.apache.org/dist/apr/apr-util-%{version}.tar.gz.asc
 Patch0:		apr-util-1.2.2-config.diff
 Patch1:		apr-util-1.2.7-link.diff
+Patch2:		apr-util-pgsql.diff
 BuildRequires:	apr-devel >= 1.3.0
 BuildRequires:	autoconf2.5
 BuildRequires:	automake1.7
@@ -20,6 +21,7 @@ BuildRequires:	db4-devel
 BuildRequires:	doxygen
 BuildRequires:	expat-devel
 BuildRequires:	libtool
+BuildRequires:	libxslt-devel
 BuildRequires:	mysql-devel
 BuildRequires:	openldap-devel
 BuildRequires:	openssl-devel
@@ -108,6 +110,7 @@ library of C data structures and routines.
 %setup -q -n %{name}-%{version}
 %patch0 -p0 -b .config
 %patch1 -p0 -b .link
+%patch2 -p0 -b .pgsql
 
 cat >> config.layout << EOF
 <Layout NUX>
