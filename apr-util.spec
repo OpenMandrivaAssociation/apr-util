@@ -25,9 +25,12 @@ BuildRequires:	libxslt-devel
 BuildRequires:	mysql-devel
 BuildRequires:	openldap-devel
 BuildRequires:	openssl-devel
+BuildRequires:	pam-devel
 BuildRequires:	postgresql-devel
 BuildRequires:	python
+BuildRequires:	readline-devel
 BuildRequires:	sqlite3-devel
+BuildRequires:	termcap-devel
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description
