@@ -1,4 +1,4 @@
-%define build_apr_dbd_freetds 0
+%define build_apr_dbd_freetds 1
 %define build_apr_dbd_mysql 1
 %define build_apr_dbd_oracle 0
 %define build_apr_dbd_pgsql 1
@@ -21,7 +21,7 @@
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
 Version:	1.3.0
-Release:	%mkrel 1
+Release:	%mkrel 2
 License:	Apache License
 Group:		System/Libraries
 URL:		http://apr.apache.org/
@@ -181,7 +181,7 @@ library of C data structures and routines.
 %patch0 -p0 -b .config
 %patch1 -p0 -b .link
 %patch2 -p0 -b .pgsql
-%patch3 -p0 -b .freetds_fix
+%patch3 -p1 -b .freetds_fix
 
 cat >> config.layout << EOF
 <Layout NUX>
