@@ -1,3 +1,19 @@
+%define build_apr_dbd_freetds 0
+%define build_apr_dbd_mysql 1
+%define build_apr_dbd_oracle 0
+%define build_apr_dbd_pgsql 1
+%define build_apr_dbd_sqlite3 1
+%{?_with_apr_dbd_freetds: %{expand: %%global build_apr_dbd_freetds 1}}
+%{?_without_apr_dbd_freetds: %{expand: %%global build_apr_dbd_freetds 0}}
+%{?_with_apr_dbd_mysql: %{expand: %%global build_apr_dbd_mysql 1}}
+%{?_without_apr_dbd_mysql: %{expand: %%global build_apr_dbd_mysql 0}}
+%{?_with_apr_dbd_oracle: %{expand: %%global build_apr_dbd_oracle 1}}
+%{?_without_apr_dbd_oracle: %{expand: %%global build_apr_dbd_oracle 0}}
+%{?_with_apr_dbd_pgsql: %{expand: %%global build_apr_dbd_pgsql 1}}
+%{?_without_apr_dbd_pgsql: %{expand: %%global build_apr_dbd_pgsql 0}}
+%{?_with_apr_dbd_sqlite3: %{expand: %%global build_apr_dbd_sqlite3 1}}
+%{?_without_apr_dbd_sqlite3: %{expand: %%global build_apr_dbd_sqlite3 0}}
+
 %define apuver 1
 %define libname %mklibname apr-util %{apuver}
 %define develname %mklibname -d apr-util
@@ -14,6 +30,7 @@ Source1:	http://www.apache.org/dist/apr/apr-util-%{version}.tar.gz.asc
 Patch0:		apr-util-1.2.2-config.diff
 Patch1:		apr-util-1.2.7-link.diff
 Patch2:		apr-util-pgsql.diff
+Patch3:		apr-util-freetds_fix.diff
 BuildRequires:	apr-devel >= 1.3.0
 BuildRequires:	autoconf2.5
 BuildRequires:	automake1.7
@@ -22,15 +39,27 @@ BuildRequires:	doxygen
 BuildRequires:	expat-devel
 BuildRequires:	libtool
 BuildRequires:	libxslt-devel
-BuildRequires:	mysql-devel
 BuildRequires:	openldap-devel
 BuildRequires:	openssl-devel
 BuildRequires:	pam-devel
-BuildRequires:	postgresql-devel
 BuildRequires:	python
 BuildRequires:	readline-devel
-BuildRequires:	sqlite3-devel
 BuildRequires:	termcap-devel
+%if %{build_apr_dbd_freetds}
+BuildRequires:	freetds-devel
+%endif
+%if %{build_apr_dbd_mysql}
+BuildRequires:	mysql-devel
+%endif
+%if %{build_apr_dbd_oracle}
+BuildRequires:	oracle-devel
+%endif
+%if %{build_apr_dbd_pgsql}
+BuildRequires:	postgresql-devel
+%endif
+%if %{build_apr_dbd_sqlite3}
+BuildRequires:	sqlite3-devel
+%endif
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description
@@ -52,6 +81,16 @@ free library of C data structures and routines.  This library
 contains additional utility interfaces for APR; including support
 for XML, LDAP, database interfaces, URI parsing and more.
 
+You can build %{name} with some conditional build swithes;
+
+(ie. use with rpm --rebuild):
+
+--with[out] apr_dbd_freetds	apr_dbd_freetds support (enabled)
+--with[out] apr_dbd_mysql	apr_dbd_mysql support (enabled)
+--with[out] apr_dbd_oracle	apr_dbd_oracle support (disabled)
+--with[out] apr_dbd_pgsql	apr_dbd_pgsql support (enabled)
+--with[out] apr_dbd_sqlite3	apr_dbd_sqlite3 support (enabled)
+
 %package	dbd-ldap
 Summary:	DBD driver for OpenLDAP
 Group:		System/Libraries
@@ -61,6 +100,7 @@ Requires:	%{libname} = %{version}-%{release}
 %description	dbd-ldap
 DBD driver for OpenLDAP.
 
+%if %{build_apr_dbd_pgsql}
 %package	dbd-pgsql
 Summary:	DBD driver for PostgreSQL
 Group:		System/Libraries
@@ -69,7 +109,9 @@ Requires:	%{libname} = %{version}-%{release}
 
 %description	dbd-pgsql
 DBD driver for PostgreSQL.
+%endif
 
+%if %{build_apr_dbd_mysql}
 %package	dbd-mysql
 Summary:	DBD driver for MySQL
 Group:		System/Libraries
@@ -78,7 +120,9 @@ Requires:	%{libname} = %{version}-%{release}
 
 %description	dbd-mysql
 DBD driver for MySQL.
+%endif
 
+%if %{build_apr_dbd_sqlite3}
 %package	dbd-sqlite3
 Summary:	DBD driver for SQLite 3
 Group:		System/Libraries
@@ -87,6 +131,29 @@ Requires:	%{libname} = %{version}-%{release}
 
 %description	dbd-sqlite3
 DBD driver for SQLite 3.
+%endif
+
+%if %{build_apr_dbd_freetds}
+%package	dbd-freetds
+Summary:	DBD driver for FreeTDS
+Group:		System/Libraries
+License:	Apache License
+Requires:	%{libname} = %{version}-%{release}
+
+%description	dbd-freetds
+DBD driver for FreeTDS.
+%endif
+
+%if %{build_apr_dbd_oracle}
+%package	dbd-oracle
+Summary:	DBD driver for Oracle
+Group:		System/Libraries
+License:	Apache License
+Requires:	%{libname} = %{version}-%{release}
+
+%description	dbd-oracle
+DBD driver for Oracle.
+%endif
 
 %package -n	%{develname}
 Group:		Development/C
@@ -114,6 +181,7 @@ library of C data structures and routines.
 %patch0 -p0 -b .config
 %patch1 -p0 -b .link
 %patch2 -p0 -b .pgsql
+%patch3 -p0 -b .freetds_fix
 
 cat >> config.layout << EOF
 <Layout NUX>
@@ -170,18 +238,29 @@ EOF
     --with-installbuilddir=%{_libdir}/apr-%{apuver}/build \
     --enable-layout=NUX \
     --with-ldap \
+%if %{build_apr_dbd_freetds}
+    --with-freetds=%{_prefix} \
+%endif
+%if %{build_apr_dbd_mysql}
     --with-mysql=%{_prefix} \
+%endif
+%if %{build_apr_dbd_oracle}
+    --with-oracle \
+%endif
+%if %{build_apr_dbd_pgsql}
     --with-pgsql=%{_prefix} \
-    --without-sqlite2 \
+%endif
+%if %{build_apr_dbd_sqlite3}
     --with-sqlite3=%{_prefix} \
+%endif
+    --without-sqlite2 \
     --with-berkeley-db \
-    --without-gdbm \
-    --without-oracle \
-    --without-freetds
+    --without-gdbm
 
 %make
 make dox
 
+%check
 pushd test
     make check
 popd
@@ -242,14 +321,32 @@ rm -rf %{buildroot}
 %defattr(0644,root,root,0755)
 %attr(0755,root,root) %{_libdir}/apr-util-%{apuver}/apr_ldap*.so
 
+%if %{build_apr_dbd_mysql}
 %files dbd-mysql
 %defattr(0644,root,root,0755)
 %attr(0755,root,root) %{_libdir}/apr-util-%{apuver}/apr_dbd_mysql*.so
+%endif
 
+%if %{build_apr_dbd_pgsql}
 %files dbd-pgsql
 %defattr(0644,root,root,0755)
 %attr(0755,root,root) %{_libdir}/apr-util-%{apuver}/apr_dbd_pgsql*.so
+%endif
 
+%if %{build_apr_dbd_sqlite3}
 %files dbd-sqlite3
 %defattr(0644,root,root,0755)
 %attr(0755,root,root) %{_libdir}/apr-util-%{apuver}/apr_dbd_sqlite3*.so
+%endif
+
+%if %{build_apr_dbd_freetds}
+%files dbd-freetds
+%defattr(0644,root,root,0755)
+%attr(0755,root,root) %{_libdir}/apr-util-%{apuver}/apr_dbd_freetds*.so
+%endif
+
+%if %{build_apr_dbd_oracle}
+%files dbd-oracle
+%defattr(0644,root,root,0755)
+%attr(0755,root,root) %{_libdir}/apr-util-%{apuver}/apr_dbd_oracle*.so
+%endif
