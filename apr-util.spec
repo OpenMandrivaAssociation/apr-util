@@ -3,6 +3,7 @@
 %define build_apr_dbd_oracle 0
 %define build_apr_dbd_pgsql 1
 %define build_apr_dbd_sqlite3 1
+%define build_apr_dbd_odbc 1
 %{?_with_apr_dbd_freetds: %{expand: %%global build_apr_dbd_freetds 1}}
 %{?_without_apr_dbd_freetds: %{expand: %%global build_apr_dbd_freetds 0}}
 %{?_with_apr_dbd_mysql: %{expand: %%global build_apr_dbd_mysql 1}}
@@ -13,6 +14,8 @@
 %{?_without_apr_dbd_pgsql: %{expand: %%global build_apr_dbd_pgsql 0}}
 %{?_with_apr_dbd_sqlite3: %{expand: %%global build_apr_dbd_sqlite3 1}}
 %{?_without_apr_dbd_sqlite3: %{expand: %%global build_apr_dbd_sqlite3 0}}
+%{?_with_apr_dbd_odbc: %{expand: %%global build_apr_dbd_odbc 1}}
+%{?_without_apr_dbd_odbc: %{expand: %%global build_apr_dbd_odbc 0}}
 
 %define apuver 1
 %define libname %mklibname apr-util %{apuver}
@@ -20,8 +23,8 @@
 
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
-Version:	1.3.0
-Release:	%mkrel 2
+Version:	1.3.2
+Release:	%mkrel 0.1
 License:	Apache License
 Group:		System/Libraries
 URL:		http://apr.apache.org/
@@ -30,7 +33,6 @@ Source1:	http://www.apache.org/dist/apr/apr-util-%{version}.tar.gz.asc
 Patch0:		apr-util-1.2.2-config.diff
 Patch1:		apr-util-1.2.7-link.diff
 Patch2:		apr-util-pgsql.diff
-Patch3:		apr-util-freetds_fix.diff
 BuildRequires:	apr-devel >= 1.3.0
 BuildRequires:	autoconf2.5
 BuildRequires:	automake1.7
@@ -59,6 +61,9 @@ BuildRequires:	postgresql-devel
 %endif
 %if %{build_apr_dbd_sqlite3}
 BuildRequires:	sqlite3-devel
+%endif
+%if %{build_apr_dbd_odbc}
+BuildRequires:	unixODBC-devel
 %endif
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
@@ -90,6 +95,7 @@ You can build %{name} with some conditional build swithes;
 --with[out] apr_dbd_oracle	apr_dbd_oracle support (disabled)
 --with[out] apr_dbd_pgsql	apr_dbd_pgsql support (enabled)
 --with[out] apr_dbd_sqlite3	apr_dbd_sqlite3 support (enabled)
+--with[out] apr_dbd_odbc	apr_dbd_odbc support (enabled)
 
 %package	dbd-ldap
 Summary:	DBD driver for OpenLDAP
@@ -155,6 +161,17 @@ Requires:	%{libname} = %{version}-%{release}
 DBD driver for Oracle.
 %endif
 
+%if %{build_apr_dbd_odbc}
+%package	dbd-odbc
+Summary:	DBD driver for unixODBC
+Group:		System/Libraries
+License:	Apache License
+Requires:	%{libname} = %{version}-%{release}
+
+%description	dbd-odbc
+DBD driver for unixODBC.
+%endif
+
 %package -n	%{develname}
 Group:		Development/C
 Summary:	APR utility library development kit
@@ -181,7 +198,6 @@ library of C data structures and routines.
 %patch0 -p0 -b .config
 %patch1 -p0 -b .link
 %patch2 -p0 -b .pgsql
-%patch3 -p1 -b .freetds_fix
 
 cat >> config.layout << EOF
 <Layout NUX>
@@ -252,6 +268,9 @@ EOF
 %endif
 %if %{build_apr_dbd_sqlite3}
     --with-sqlite3=%{_prefix} \
+%endif
+%if %{build_apr_dbd_odbc}
+    --with-odbc=%{_prefix} \
 %endif
     --without-sqlite2 \
     --with-berkeley-db \
@@ -349,4 +368,10 @@ rm -rf %{buildroot}
 %files dbd-oracle
 %defattr(0644,root,root,0755)
 %attr(0755,root,root) %{_libdir}/apr-util-%{apuver}/apr_dbd_oracle*.so
+%endif
+
+%if %{build_apr_dbd_odbc}
+%files dbd-odbc
+%defattr(0644,root,root,0755)
+%attr(0755,root,root) %{_libdir}/apr-util-%{apuver}/apr_dbd_odbc*.so
 %endif
