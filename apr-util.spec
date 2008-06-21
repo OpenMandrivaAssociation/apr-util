@@ -24,7 +24,7 @@
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
 Version:	1.3.2
-Release:	%mkrel 0.1
+Release:	%mkrel 1
 License:	Apache License
 Group:		System/Libraries
 URL:		http://apr.apache.org/
@@ -121,7 +121,7 @@ DBD driver for PostgreSQL.
 %package	dbd-mysql
 Summary:	DBD driver for MySQL
 Group:		System/Libraries
-License:	GPL
+License:	Apache License
 Requires:	%{libname} = %{version}-%{release}
 
 %description	dbd-mysql
@@ -173,8 +173,8 @@ DBD driver for unixODBC.
 %endif
 
 %package -n	%{develname}
-Group:		Development/C
 Summary:	APR utility library development kit
+Group:		Development/C
 Requires:	%{name} = %{version}
 Requires:	%{libname} = %{version}-%{release}
 Requires:	apr-util = %{version}
