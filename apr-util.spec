@@ -4,6 +4,7 @@
 %define build_apr_dbd_pgsql 1
 %define build_apr_dbd_sqlite3 1
 %define build_apr_dbd_odbc 1
+
 %{?_with_apr_dbd_freetds: %{expand: %%global build_apr_dbd_freetds 1}}
 %{?_without_apr_dbd_freetds: %{expand: %%global build_apr_dbd_freetds 0}}
 %{?_with_apr_dbd_mysql: %{expand: %%global build_apr_dbd_mysql 1}}
@@ -24,7 +25,7 @@
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
 Version:	1.3.2
-Release:	%mkrel 1
+Release:	%mkrel 2
 License:	Apache License
 Group:		System/Libraries
 URL:		http://apr.apache.org/
