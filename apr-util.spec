@@ -24,8 +24,8 @@
 
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
-Version:	1.3.2
-Release:	%mkrel 2
+Version:	1.3.3
+Release:	%mkrel 0.1
 License:	Apache License
 Group:		System/Libraries
 URL:		http://apr.apache.org/
@@ -33,8 +33,7 @@ Source0:	http://www.apache.org/dist/apr/apr-util-%{version}.tar.gz
 Source1:	http://www.apache.org/dist/apr/apr-util-%{version}.tar.gz.asc
 Patch0:		apr-util-1.2.2-config.diff
 Patch1:		apr-util-1.2.7-link.diff
-Patch2:		apr-util-pgsql.diff
-BuildRequires:	apr-devel >= 1.3.0
+BuildRequires:	apr-devel >= 1:%{version}
 BuildRequires:	autoconf2.5
 BuildRequires:	automake1.7
 BuildRequires:	db4-devel
@@ -178,8 +177,7 @@ Summary:	APR utility library development kit
 Group:		Development/C
 Requires:	%{name} = %{version}
 Requires:	%{libname} = %{version}-%{release}
-Requires:	apr-util = %{version}
-Requires:	apr-devel
+Requires:	apr-util >= 1:%{version}
 Requires:	openldap-devel
 Requires:	expat-devel
 Provides:	%{mklibname apr-util -d 1} = %{version}-%{release}
@@ -198,7 +196,6 @@ library of C data structures and routines.
 %setup -q -n %{name}-%{version}
 %patch0 -p0 -b .config
 %patch1 -p0 -b .link
-%patch2 -p0 -b .pgsql
 
 cat >> config.layout << EOF
 <Layout NUX>
