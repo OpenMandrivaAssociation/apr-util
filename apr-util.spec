@@ -25,7 +25,7 @@
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
 Version:	1.3.3
-Release:	%mkrel 0.1
+Release:	%mkrel 0.2
 License:	Apache License
 Group:		System/Libraries
 URL:		http://apr.apache.org/
@@ -177,7 +177,8 @@ Summary:	APR utility library development kit
 Group:		Development/C
 Requires:	%{name} = %{version}
 Requires:	%{libname} = %{version}-%{release}
-Requires:	apr-util >= 1:%{version}
+Requires:	apr-util = %{version}
+Requires:	apr-devel
 Requires:	openldap-devel
 Requires:	expat-devel
 Provides:	%{mklibname apr-util -d 1} = %{version}-%{release}
