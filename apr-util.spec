@@ -33,7 +33,7 @@ Source0:	http://www.apache.org/dist/apr/apr-util-%{version}.tar.gz
 Source1:	http://www.apache.org/dist/apr/apr-util-%{version}.tar.gz.asc
 Patch0:		apr-util-1.2.2-config.diff
 Patch1:		apr-util-1.2.7-link.diff
-BuildRequires:	apr-devel >= 1:%{version}
+BuildRequires:	apr-devel >= 1:1.3.3
 BuildRequires:	autoconf2.5
 BuildRequires:	automake1.7
 BuildRequires:	db4-devel
