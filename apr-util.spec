@@ -180,7 +180,6 @@ Requires:	%{libname} = %{version}-%{release}
 Requires:	apr-util = %{version}
 Requires:	apr-devel
 Requires:	openldap-devel
-Requires:	libtool
 Requires:	expat-devel
 Provides:	%{mklibname apr-util -d 1} = %{version}-%{release}
 Obsoletes:	%{mklibname apr-util -d 1}
@@ -305,9 +304,6 @@ perl -pi -e "s|^LDFLAGS=.*|LDFLAGS=\"\"|g" %{buildroot}%{_bindir}/apu-%{apuver}-
 
 # includes anti-borker
 perl -pi -e "s|-I%{_includedir}/mysql||g" %{buildroot}%{_bindir}/apu-%{apuver}-config
-
-# enforce system libtool
-ln -snf %{_bindir}/libtool %{buildroot}%{_libdir}/apr-%{apuver}/build/build/libtool
 
 # Unpackaged files
 rm -f %{buildroot}%{_libdir}/aprutil.exp
