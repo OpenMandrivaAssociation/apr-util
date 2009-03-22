@@ -25,7 +25,7 @@
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
 Version:	1.3.4
-Release:	%mkrel 8
+Release:	%mkrel 9
 License:	Apache License
 Group:		System/Libraries
 URL:		http://apr.apache.org/
@@ -36,6 +36,10 @@ Patch1:		apr-util-1.2.7-link.diff
 Patch2:		apr-util-freetds-segfault.patch
 Patch3:		apr-util-1.3.x-PR46482.diff
 Patch4:		apr-util-1.3.x-PR46588.diff
+Patch5:		apr-util-1.3.x-PR45679.diff
+Patch6:		apr-util-1.3.x-PR46012.diff
+Patch7:		apr-util-1.3.x-PR23356.diff
+Patch8:		apr-util-1.3.x-misc_svn_fixes.diff
 BuildRequires:	apr-devel >= 1:1.3.3
 BuildRequires:	autoconf2.5
 BuildRequires:	automake1.7
@@ -203,6 +207,10 @@ library of C data structures and routines.
 %patch2 -p0 -b .freetds-segfault
 %patch3 -p0 -b .PR46482
 %patch4 -p0 -b .PR46588
+%patch5 -p0 -b .PR45679
+%patch6 -p0 -b .PR46012
+%patch7 -p0 -b .PR23356
+%patch8 -p0 -b .misc_svn_fixes
 
 cat >> config.layout << EOF
 <Layout NUX>
