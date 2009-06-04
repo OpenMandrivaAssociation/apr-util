@@ -1,10 +1,14 @@
+%define build_apr_dbd_ldap 1
 %define build_apr_dbd_freetds 1
 %define build_apr_dbd_mysql 1
 %define build_apr_dbd_oracle 0
 %define build_apr_dbd_pgsql 1
 %define build_apr_dbd_sqlite3 1
 %define build_apr_dbd_odbc 1
+%define build_apr_dbm_db 1
 
+%{?_with_apr_dbd_ldap: %{expand: %%global build_apr_dbd_ldap 1}}
+%{?_without_apr_dbd_ldap: %{expand: %%global build_apr_dbd_ldap 0}}
 %{?_with_apr_dbd_freetds: %{expand: %%global build_apr_dbd_freetds 1}}
 %{?_without_apr_dbd_freetds: %{expand: %%global build_apr_dbd_freetds 0}}
 %{?_with_apr_dbd_mysql: %{expand: %%global build_apr_dbd_mysql 1}}
@@ -17,6 +21,8 @@
 %{?_without_apr_dbd_sqlite3: %{expand: %%global build_apr_dbd_sqlite3 0}}
 %{?_with_apr_dbd_odbc: %{expand: %%global build_apr_dbd_odbc 1}}
 %{?_without_apr_dbd_odbc: %{expand: %%global build_apr_dbd_odbc 0}}
+%{?_with_apr_dbm_db: %{expand: %%global build_apr_dbm_db 1}}
+%{?_without_apr_dbm_db: %{expand: %%global build_apr_dbm_db 0}}
 
 %define apuver 1
 %define libname %mklibname apr-util %{apuver}
@@ -24,8 +30,8 @@
 
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
-Version:	1.3.4
-Release:	%mkrel 9
+Version:	1.3.7
+Release:	%mkrel 0.1
 License:	Apache License
 Group:		System/Libraries
 URL:		http://apr.apache.org/
@@ -33,27 +39,22 @@ Source0:	http://www.apache.org/dist/apr/apr-util-%{version}.tar.gz
 Source1:	http://www.apache.org/dist/apr/apr-util-%{version}.tar.gz.asc
 Patch0:		apr-util-1.2.2-config.diff
 Patch1:		apr-util-1.2.7-link.diff
-Patch2:		apr-util-freetds-segfault.patch
-Patch3:		apr-util-1.3.x-PR46482.diff
-Patch4:		apr-util-1.3.x-PR46588.diff
-Patch5:		apr-util-1.3.x-PR45679.diff
-Patch6:		apr-util-1.3.x-PR46012.diff
-Patch7:		apr-util-1.3.x-PR23356.diff
-Patch8:		apr-util-1.3.x-misc_svn_fixes.diff
 BuildRequires:	apr-devel >= 1:1.3.3
 BuildRequires:	autoconf2.5
 BuildRequires:	automake1.7
-BuildRequires:	db4-devel
 BuildRequires:	doxygen
 BuildRequires:	expat-devel
 BuildRequires:	libtool
 BuildRequires:	libxslt-devel
-BuildRequires:	openldap-devel
 BuildRequires:	openssl-devel
 BuildRequires:	pam-devel
 BuildRequires:	python
 BuildRequires:	readline-devel
 BuildRequires:	termcap-devel
+%if %{build_apr_dbd_ldap}
+BuildRequires:	openldap-devel
+BuildRequires:	db4-devel
+%endif
 %if %{build_apr_dbd_freetds}
 BuildRequires:	freetds-devel
 %endif
@@ -71,6 +72,9 @@ BuildRequires:	sqlite3-devel
 %endif
 %if %{build_apr_dbd_odbc}
 BuildRequires:	unixODBC-devel
+%endif
+%if %{build_apr_dbm_db}
+BuildRequires:	db4-devel
 %endif
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
@@ -97,13 +101,16 @@ You can build %{name} with some conditional build swithes;
 
 (ie. use with rpm --rebuild):
 
+--with[out] apr_dbd_ldap	apr_dbd_ldap support (enabled)
 --with[out] apr_dbd_freetds	apr_dbd_freetds support (enabled)
 --with[out] apr_dbd_mysql	apr_dbd_mysql support (enabled)
 --with[out] apr_dbd_oracle	apr_dbd_oracle support (disabled)
 --with[out] apr_dbd_pgsql	apr_dbd_pgsql support (enabled)
 --with[out] apr_dbd_sqlite3	apr_dbd_sqlite3 support (enabled)
 --with[out] apr_dbd_odbc	apr_dbd_odbc support (enabled)
+--with[out] apr_dbm_db		apr_dbm_db support (enabled)
 
+%if %{build_apr_dbd_ldap}
 %package	dbd-ldap
 Summary:	DBD driver for OpenLDAP
 Group:		System/Libraries
@@ -112,6 +119,7 @@ Requires:	%{libname} = %{version}-%{release}
 
 %description	dbd-ldap
 DBD driver for OpenLDAP.
+%endif
 
 %if %{build_apr_dbd_pgsql}
 %package	dbd-pgsql
@@ -179,6 +187,17 @@ Requires:	%{libname} = %{version}-%{release}
 DBD driver for unixODBC.
 %endif
 
+%if %{build_apr_dbm_db}
+%package	dbm-db
+Summary:	DBD driver for Berkley BD
+Group:		System/Libraries
+License:	Apache License
+Requires:	%{libname} = %{version}-%{release}
+
+%description	dbm-db
+DBD driver for Berkley BD.
+%endif
+
 %package -n	%{develname}
 Summary:	APR utility library development kit
 Group:		Development/C
@@ -204,13 +223,6 @@ library of C data structures and routines.
 %setup -q -n %{name}-%{version}
 %patch0 -p0 -b .config
 %patch1 -p0 -b .link
-%patch2 -p0 -b .freetds-segfault
-%patch3 -p0 -b .PR46482
-%patch4 -p0 -b .PR46588
-%patch5 -p0 -b .PR45679
-%patch6 -p0 -b .PR46012
-%patch7 -p0 -b .PR23356
-%patch8 -p0 -b .misc_svn_fixes
 
 cat >> config.layout << EOF
 <Layout NUX>
@@ -266,7 +278,9 @@ EOF
     --includedir=%{_includedir}/apr-%{apuver} \
     --with-installbuilddir=%{_libdir}/apr-%{apuver}/build \
     --enable-layout=NUX \
+%if %{build_apr_dbd_ldap}
     --with-ldap \
+%endif
 %if %{build_apr_dbd_freetds}
     --with-freetds=%{_prefix} \
 %endif
@@ -285,8 +299,10 @@ EOF
 %if %{build_apr_dbd_odbc}
     --with-odbc=%{_prefix} \
 %endif
-    --without-sqlite2 \
+%if %{build_apr_dbm_db}
     --with-berkeley-db \
+%endif
+    --without-sqlite2 \
     --without-gdbm
 
 %make
@@ -349,9 +365,11 @@ rm -rf %{buildroot}
 %{_libdir}/apr-util-%{apuver}/apr_*.*a
 %{_libdir}/pkgconfig/*.pc
 
+%if %{build_apr_dbd_ldap}
 %files dbd-ldap
 %defattr(0644,root,root,0755)
 %attr(0755,root,root) %{_libdir}/apr-util-%{apuver}/apr_ldap*.so
+%endif
 
 %if %{build_apr_dbd_mysql}
 %files dbd-mysql
@@ -387,4 +405,10 @@ rm -rf %{buildroot}
 %files dbd-odbc
 %defattr(0644,root,root,0755)
 %attr(0755,root,root) %{_libdir}/apr-util-%{apuver}/apr_dbd_odbc*.so
+%endif
+
+%if %{build_apr_dbm_db}
+%files dbm-db
+%defattr(0644,root,root,0755)
+%attr(0755,root,root) %{_libdir}/apr-util-%{apuver}/apr_dbm_db*.so
 %endif
