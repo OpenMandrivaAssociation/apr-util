@@ -31,7 +31,7 @@
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
 Version:	1.3.8
-Release:	%mkrel 2
+Release:	%mkrel 3
 License:	Apache License
 Group:		System/Libraries
 URL:		http://apr.apache.org/
@@ -77,6 +77,13 @@ BuildRequires:	unixODBC-devel
 BuildRequires:	db4-devel
 %endif
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
+
+%if %{build_apr_dbd_pgsql}
+# stupid postgresql... stupid build system...
+# this is needed due to the postgresql packaging and due to bugs like this:
+# https://qa.mandriva.com/show_bug.cgi?id=52527
+%define postgresql_version %(pg_config &>/dev/null && pg_config 2>/dev/null | grep "^VERSION" | awk '{ print $4 }' 2>/dev/null || echo 0)
+%endif
 
 %description
 The mission of the Apache Portable Runtime (APR) is to provide a
@@ -127,6 +134,7 @@ Summary:	DBD driver for PostgreSQL
 Group:		System/Libraries
 License:	Apache License
 Requires:	%{libname} = %{version}-%{release}
+Requires:	postgresql-libs >= %{postgresql_version}
 
 %description	dbd-pgsql
 DBD driver for PostgreSQL.
