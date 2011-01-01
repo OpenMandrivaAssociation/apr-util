@@ -31,7 +31,7 @@
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
 Version:	1.3.10
-Release:	%mkrel 6
+Release:	%mkrel 7
 License:	Apache License
 Group:		System/Libraries
 URL:		http://apr.apache.org/
@@ -41,7 +41,7 @@ Patch0:		apr-util-1.2.2-config.diff
 Patch1:		apr-util-1.2.7-link.diff
 BuildRequires:	apr-devel >= 1:1.3.3
 BuildRequires:	autoconf2.5
-BuildRequires:	automake1.7
+BuildRequires:	automake
 BuildRequires:	doxygen
 BuildRequires:	expat-devel
 BuildRequires:	libtool
@@ -268,7 +268,7 @@ perl -pi -e "s|/lib\b|/%{_lib}|g" build/*.m4
 
 export WANT_AUTOCONF_2_5=1
 rm -f configure
-libtoolize --copy --force; aclocal-1.7; autoconf --force
+libtoolize --copy --force; aclocal; autoconf --force
 python build/gen-build.py make
 
 %{__sed} -i -e '/OBJECTS_all/s, dbd/apr_dbd_[^ ]*\.lo,,g' build-outputs.mk
