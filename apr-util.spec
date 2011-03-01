@@ -31,7 +31,7 @@
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
 Version:	1.3.10
-Release:	%mkrel 7
+Release:	%mkrel 8
 License:	Apache License
 Group:		System/Libraries
 URL:		http://apr.apache.org/
@@ -54,7 +54,7 @@ BuildRequires:	readline-devel
 BuildRequires:	termcap-devel
 %if %{build_apr_dbd_ldap}
 BuildRequires:	openldap-devel
-BuildRequires:	db4-devel
+BuildRequires:	db-devel
 %endif
 %if %{build_apr_dbd_freetds}
 BuildRequires:	freetds-devel
@@ -75,7 +75,7 @@ BuildRequires:	sqlite3-devel
 BuildRequires:	unixODBC-devel
 %endif
 %if %{build_apr_dbm_db}
-BuildRequires:	db4-devel
+BuildRequires:	db-devel
 %endif
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
