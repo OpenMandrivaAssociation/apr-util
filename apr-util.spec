@@ -30,8 +30,8 @@
 
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
-Version:	1.3.10
-Release:	%mkrel 10
+Version:	1.3.11
+Release:	%mkrel 1
 License:	Apache License
 Group:		System/Libraries
 URL:		http://apr.apache.org/
@@ -39,7 +39,6 @@ Source0:	http://www.apache.org/dist/apr/apr-util-%{version}.tar.gz
 Source1:	http://www.apache.org/dist/apr/apr-util-%{version}.tar.gz.asc
 Patch0:		apr-util-1.2.2-config.diff
 Patch1:		apr-util-1.2.7-link.diff
-Patch2:		apr-util-1.3.10-db51.diff
 BuildRequires:	apr-devel >= 1:1.3.3
 BuildRequires:	autoconf2.5
 BuildRequires:	automake
@@ -232,7 +231,6 @@ library of C data structures and routines.
 %setup -q -n %{name}-%{version}
 %patch0 -p0 -b .config
 %patch1 -p0 -b .link
-%patch2 -p0 -b .db51
 
 cat >> config.layout << EOF
 <Layout NUX>
