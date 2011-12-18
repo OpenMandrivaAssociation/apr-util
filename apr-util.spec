@@ -30,8 +30,8 @@
 
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
-Version:	1.3.12
-Release:	%mkrel 4
+Version:	1.4.1
+Release:	%mkrel 1
 License:	Apache License
 Group:		System/Libraries
 URL:		http://apr.apache.org/
@@ -41,12 +41,12 @@ Patch0:		apr-util-1.2.2-config.diff
 Patch1:		apr-util-1.2.7-link.diff
 Patch2:		apr-util-1.3.12-linkage_fix.diff
 BuildRequires:	apr-devel >= 1:1.3.3
-BuildRequires:	autoconf2.5
-BuildRequires:	automake
+BuildRequires:	autoconf automake libtool
 BuildRequires:	doxygen
 BuildRequires:	expat-devel
-BuildRequires:	libtool
 BuildRequires:	libxslt-devel
+BuildRequires:	nss-devel
+BuildRequires:	nspr-devel
 BuildRequires:	openssl-devel
 BuildRequires:	pam-devel
 BuildRequires:	python
@@ -123,7 +123,7 @@ You can build %{name} with some conditional build swithes;
 Summary:	DBD driver for OpenLDAP
 Group:		System/Libraries
 License:	Apache License
-Requires:	%{libname} = %{version}-%{release}
+Requires:	%{libname} >= %{version}-%{release}
 
 %description	dbd-ldap
 DBD driver for OpenLDAP.
@@ -134,7 +134,7 @@ DBD driver for OpenLDAP.
 Summary:	DBD driver for PostgreSQL
 Group:		System/Libraries
 License:	Apache License
-Requires:	%{libname} = %{version}-%{release}
+Requires:	%{libname} >= %{version}-%{release}
 Requires:	postgresql-libs >= %{postgresql_version}
 
 %description	dbd-pgsql
@@ -146,7 +146,7 @@ DBD driver for PostgreSQL.
 Summary:	DBD driver for MySQL
 Group:		System/Libraries
 License:	Apache License
-Requires:	%{libname} = %{version}-%{release}
+Requires:	%{libname} >= %{version}-%{release}
 
 %description	dbd-mysql
 DBD driver for MySQL.
@@ -157,7 +157,7 @@ DBD driver for MySQL.
 Summary:	DBD driver for SQLite 3
 Group:		System/Libraries
 License:	Apache License
-Requires:	%{libname} = %{version}-%{release}
+Requires:	%{libname} >= %{version}-%{release}
 
 %description	dbd-sqlite3
 DBD driver for SQLite 3.
@@ -168,7 +168,7 @@ DBD driver for SQLite 3.
 Summary:	DBD driver for FreeTDS
 Group:		System/Libraries
 License:	Apache License
-Requires:	%{libname} = %{version}-%{release}
+Requires:	%{libname} >= %{version}-%{release}
 
 %description	dbd-freetds
 DBD driver for FreeTDS.
@@ -179,7 +179,7 @@ DBD driver for FreeTDS.
 Summary:	DBD driver for Oracle
 Group:		System/Libraries
 License:	Apache License
-Requires:	%{libname} = %{version}-%{release}
+Requires:	%{libname} >= %{version}-%{release}
 
 %description	dbd-oracle
 DBD driver for Oracle.
@@ -190,7 +190,7 @@ DBD driver for Oracle.
 Summary:	DBD driver for unixODBC
 Group:		System/Libraries
 License:	Apache License
-Requires:	%{libname} = %{version}-%{release}
+Requires:	%{libname} >= %{version}-%{release}
 
 %description	dbd-odbc
 DBD driver for unixODBC.
@@ -201,17 +201,33 @@ DBD driver for unixODBC.
 Summary:	DBD driver for Berkley BD
 Group:		System/Libraries
 License:	Apache License
-Requires:	%{libname} = %{version}-%{release}
+Requires:	%{libname} >= %{version}-%{release}
 
 %description	dbm-db
 DBD driver for Berkley BD.
 %endif
 
+%package	openssl
+Summary:	APR utility library OpenSSL crypto support
+Group:		System/Libraries
+Requires:	%{libname} >= %{version}-%{release}
+
+%description	openssl
+This package provides the OpenSSL crypto support for apr-util.
+
+%package	nss
+Summary:	APR utility library NSS crypto support
+Group:		System/Libraries
+Requires:	%{libname} >= %{version}-%{release}
+
+%description	nss
+This package provides the NSS crypto support for apr-util.
+
 %package -n	%{develname}
 Summary:	APR utility library development kit
 Group:		Development/C
-Requires:	%{name} = %{version}
-Requires:	%{libname} = %{version}-%{release}
+Requires:	%{name} >= %{version}
+Requires:	%{libname} >= %{version}-%{release}
 Requires:	apr-util = %{version}
 Requires:	apr-devel
 Requires:	openldap-devel
@@ -275,11 +291,12 @@ python build/gen-build.py make
 
 %{__sed} -i -e '/OBJECTS_all/s, dbd/apr_dbd_[^ ]*\.lo,,g' build-outputs.mk
 
-# use sqlite3 only
+# force values that may produce wrong results
 export apu_have_sqlite2='0'
 cat >> config.cache << EOF
 ac_cv_header_sqlite_h=no
 ac_cv_lib_sqlite_sqlite_open=no
+ac_cv_ldap_set_rebind_proc_style=three
 EOF
 
 %configure2_5x \
@@ -313,7 +330,8 @@ EOF
     --with-berkeley-db \
 %endif
     --without-sqlite2 \
-    --without-gdbm
+    --without-gdbm \
+    --with-crypto --with-openssl=%{_prefix} --with-nss=%{_prefix}
 
 %make
 make dox
@@ -331,7 +349,7 @@ rm -rf %{buildroot}
 # Documentation
 rm -rf html; cp -rp docs/dox/html html
 
-# multiacrh anti-borker
+# multiarch anti-borker
 perl -pi -e "s|^LDFLAGS=.*|LDFLAGS=\"\"|g" %{buildroot}%{_bindir}/apu-%{apuver}-config
 
 # includes anti-borker
@@ -344,17 +362,12 @@ rm -f %{buildroot}%{_libdir}/aprutil.exp
 rm -f %{buildroot}%{_libdir}/libaprutil-%{apuver}.*a
 rm -f %{buildroot}%{_libdir}/apr-util-%{apuver}/apr_*.*a
 
-%clean
-rm -rf %{buildroot}
-
 %files -n %{libname}
-%defattr(-,root,root,-)
 %doc CHANGES LICENSE
 %{_libdir}/libaprutil-%{apuver}.so.*
 %dir %{_libdir}/apr-util-%{apuver}
 
 %files -n %{develname}
-%defattr(-,root,root,-)
 %doc --parents html
 %attr(0755,root,root) %{_bindir}/apu-%{apuver}-config
 %{_includedir}/apr-%{apuver}/*.h
@@ -363,48 +376,46 @@ rm -rf %{buildroot}
 
 %if %{build_apr_dbd_ldap}
 %files dbd-ldap
-%defattr(0644,root,root,0755)
 %attr(0755,root,root) %{_libdir}/apr-util-%{apuver}/apr_ldap*.so
 %endif
 
 %if %{build_apr_dbd_mysql}
 %files dbd-mysql
-%defattr(0644,root,root,0755)
 %attr(0755,root,root) %{_libdir}/apr-util-%{apuver}/apr_dbd_mysql*.so
 %endif
 
 %if %{build_apr_dbd_pgsql}
 %files dbd-pgsql
-%defattr(0644,root,root,0755)
 %attr(0755,root,root) %{_libdir}/apr-util-%{apuver}/apr_dbd_pgsql*.so
 %endif
 
 %if %{build_apr_dbd_sqlite3}
 %files dbd-sqlite3
-%defattr(0644,root,root,0755)
 %attr(0755,root,root) %{_libdir}/apr-util-%{apuver}/apr_dbd_sqlite3*.so
 %endif
 
 %if %{build_apr_dbd_freetds}
 %files dbd-freetds
-%defattr(0644,root,root,0755)
 %attr(0755,root,root) %{_libdir}/apr-util-%{apuver}/apr_dbd_freetds*.so
 %endif
 
 %if %{build_apr_dbd_oracle}
 %files dbd-oracle
-%defattr(0644,root,root,0755)
 %attr(0755,root,root) %{_libdir}/apr-util-%{apuver}/apr_dbd_oracle*.so
 %endif
 
 %if %{build_apr_dbd_odbc}
 %files dbd-odbc
-%defattr(0644,root,root,0755)
 %attr(0755,root,root) %{_libdir}/apr-util-%{apuver}/apr_dbd_odbc*.so
 %endif
 
 %if %{build_apr_dbm_db}
 %files dbm-db
-%defattr(0644,root,root,0755)
 %attr(0755,root,root) %{_libdir}/apr-util-%{apuver}/apr_dbm_db*.so
 %endif
+
+%files openssl
+%attr(0755,root,root) %{_libdir}/apr-util-%{apuver}/apr_crypto_openssl*.so
+
+%files nss
+%attr(0755,root,root) %{_libdir}/apr-util-%{apuver}/apr_crypto_nss*.so
