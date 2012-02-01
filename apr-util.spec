@@ -1,3 +1,12 @@
+%if %mandriva_branch == Cooker
+# Cooker
+%define release %mkrel 2
+%else
+# Old distros
+%define subrel 1
+%define release %mkrel 0
+%endif
+
 %define build_apr_dbd_ldap 1
 %define build_apr_dbd_freetds 1
 %define build_apr_dbd_mysql 1
@@ -31,7 +40,7 @@
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
 Version:	1.4.1
-Release:	%mkrel 1
+Release:	%release
 License:	Apache License
 Group:		System/Libraries
 URL:		http://apr.apache.org/
@@ -40,7 +49,7 @@ Source1:	http://www.apache.org/dist/apr/apr-util-%{version}.tar.gz.asc
 Patch0:		apr-util-1.2.2-config.diff
 Patch1:		apr-util-1.2.7-link.diff
 Patch2:		apr-util-1.3.12-linkage_fix.diff
-BuildRequires:	apr-devel >= 1:1.3.3
+BuildRequires:	apr-devel >= 1:1.4.5
 BuildRequires:	autoconf automake libtool
 BuildRequires:	doxygen
 BuildRequires:	expat-devel
@@ -349,6 +358,12 @@ rm -rf %{buildroot}
 # Documentation
 rm -rf html; cp -rp docs/dox/html html
 
+# Remove unnecessary exports from dependency_libs
+sed -ri '/^dependency_libs/{s,-l(pq|sqlite[0-9]|mysqlclient_r|rt|dl|uuid) ,,g}' %{buildroot}%{_libdir}/libapr*.la
+
+# here as well
+sed -ri '/^dependency_libs/{s,%{_libdir}/lib(sqlite[0-9]|mysqlclient_r)\.la ,,g}' %{buildroot}%{_libdir}/libapr*.la
+
 # multiarch anti-borker
 perl -pi -e "s|^LDFLAGS=.*|LDFLAGS=\"\"|g" %{buildroot}%{_bindir}/apu-%{apuver}-config
 
@@ -358,9 +373,11 @@ perl -pi -e "s|-I%{_includedir}/mysql||g" %{buildroot}%{_bindir}/apu-%{apuver}-c
 # Unpackaged files
 rm -f %{buildroot}%{_libdir}/aprutil.exp
 
+%if %mdkversion >= 201200
 # cleanup
 rm -f %{buildroot}%{_libdir}/libaprutil-%{apuver}.*a
 rm -f %{buildroot}%{_libdir}/apr-util-%{apuver}/apr_*.*a
+%endif
 
 %files -n %{libname}
 %doc CHANGES LICENSE
@@ -372,6 +389,10 @@ rm -f %{buildroot}%{_libdir}/apr-util-%{apuver}/apr_*.*a
 %attr(0755,root,root) %{_bindir}/apu-%{apuver}-config
 %{_includedir}/apr-%{apuver}/*.h
 %{_libdir}/libaprutil-%{apuver}.so
+%if %mdkversion < 201200
+%{_libdir}/libaprutil-%{apuver}.*a
+%{_libdir}/apr-util-%{apuver}/apr_*.*a
+%endif
 %{_libdir}/pkgconfig/*.pc
 
 %if %{build_apr_dbd_ldap}
