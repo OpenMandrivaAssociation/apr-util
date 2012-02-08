@@ -1,9 +1,9 @@
 %if %mandriva_branch == Cooker
 # Cooker
-%define release %mkrel 2
+%define release %mkrel 3
 %else
 # Old distros
-%define subrel 1
+%define subrel 2
 %define release %mkrel 0
 %endif
 
@@ -358,12 +358,6 @@ rm -rf %{buildroot}
 # Documentation
 rm -rf html; cp -rp docs/dox/html html
 
-# Remove unnecessary exports from dependency_libs
-sed -ri '/^dependency_libs/{s,-l(pq|sqlite[0-9]|mysqlclient_r|rt|dl|uuid) ,,g}' %{buildroot}%{_libdir}/libapr*.la
-
-# here as well
-sed -ri '/^dependency_libs/{s,%{_libdir}/lib(sqlite[0-9]|mysqlclient_r)\.la ,,g}' %{buildroot}%{_libdir}/libapr*.la
-
 # multiarch anti-borker
 perl -pi -e "s|^LDFLAGS=.*|LDFLAGS=\"\"|g" %{buildroot}%{_bindir}/apu-%{apuver}-config
 
@@ -373,11 +367,9 @@ perl -pi -e "s|-I%{_includedir}/mysql||g" %{buildroot}%{_bindir}/apu-%{apuver}-c
 # Unpackaged files
 rm -f %{buildroot}%{_libdir}/aprutil.exp
 
-%if %mdkversion >= 201200
 # cleanup
 rm -f %{buildroot}%{_libdir}/libaprutil-%{apuver}.*a
 rm -f %{buildroot}%{_libdir}/apr-util-%{apuver}/apr_*.*a
-%endif
 
 %files -n %{libname}
 %doc CHANGES LICENSE
@@ -389,10 +381,6 @@ rm -f %{buildroot}%{_libdir}/apr-util-%{apuver}/apr_*.*a
 %attr(0755,root,root) %{_bindir}/apu-%{apuver}-config
 %{_includedir}/apr-%{apuver}/*.h
 %{_libdir}/libaprutil-%{apuver}.so
-%if %mdkversion < 201200
-%{_libdir}/libaprutil-%{apuver}.*a
-%{_libdir}/apr-util-%{apuver}/apr_*.*a
-%endif
 %{_libdir}/pkgconfig/*.pc
 
 %if %{build_apr_dbd_ldap}
