@@ -1,6 +1,6 @@
 %if %mandriva_branch == Cooker
 # Cooker
-%define release %mkrel 3
+%define release %mkrel 4
 %else
 # Old distros
 %define subrel 2
@@ -46,7 +46,7 @@ Group:		System/Libraries
 URL:		http://apr.apache.org/
 Source0:	http://www.apache.org/dist/apr/apr-util-%{version}.tar.gz
 Source1:	http://www.apache.org/dist/apr/apr-util-%{version}.tar.gz.asc
-Patch0:		apr-util-1.2.2-config.diff
+Patch0:		apr-util-1.4.1-config.diff
 Patch1:		apr-util-1.2.7-link.diff
 Patch2:		apr-util-1.3.12-linkage_fix.diff
 BuildRequires:	apr-devel >= 1:1.4.5
@@ -253,9 +253,8 @@ of the Apache Portable Runtime (APR) is to provide a free
 library of C data structures and routines.
 
 %prep
-
 %setup -q -n %{name}-%{version}
-%patch0 -p0 -b .config
+%patch0 -p1 -b .config
 %patch1 -p0 -b .link
 %patch2 -p0 -b .linkage_fix
 
