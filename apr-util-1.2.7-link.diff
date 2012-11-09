@@ -1,0 +1,15 @@
+--- configure.in	2008-07-21 10:59:23.000000000 +0200
++++ configure.in.oden	2008-12-15 11:30:22.000000000 +0100
+@@ -164,7 +164,12 @@
+ dnl Enable DSO build; must be last:
+ APU_CHECK_UTIL_DSO
+ 
++save_LIBS="$LIBS"
++LIBS=
+ AC_SEARCH_LIBS(crypt, crypt ufc)
++APR_ADDTO(APRUTIL_EXPORT_LIBS, [$LIBS])
++APR_ADDTO(APRUTIL_LIBS, [$LIBS])
++LIBS="$save_LIBS $LIBS"
+ AC_MSG_CHECKING(if system crypt() function is threadsafe)
+ if test "x$apu_crypt_threadsafe" = "x1"; then
+   AC_DEFINE(APU_CRYPT_THREADSAFE, 1, [Define if the system crypt() function is threadsafe])

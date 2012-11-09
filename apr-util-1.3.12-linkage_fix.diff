@@ -1,0 +1,11 @@
+--- build/apu-conf.m4	2010-10-01 14:04:03.000000000 -0400
++++ build/apu-conf.m4.oden	2011-11-29 13:31:53.217807093 -0500
+@@ -37,7 +37,7 @@
+   APR_BUILD_DIR="`cd $APR_BUILD_DIR && pwd`"
+ 
+   APR_INCLUDES="`$apr_config --includes`"
+-  APR_LIBS="`$apr_config --link-libtool --libs`"
++  APR_LIBS="`$apr_config --link-ld`"
+   APR_SO_EXT="`$apr_config --apr-so-ext`"
+   APR_LIB_TARGET="`$apr_config --apr-lib-target`"
+ 
