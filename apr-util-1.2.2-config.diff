@@ -1,6 +1,6 @@
---- apr-util-1.4.1/apu-config.in.config	2010-11-26 15:21:37.000000000 +0100
-+++ apr-util-1.4.1/apu-config.in	2012-02-14 21:19:06.446306473 +0100
-@@ -25,6 +25,7 @@ prefix="@prefix@"
+--- apu-config.in	2010-09-29 16:22:45.000000000 +0200
++++ apu-config.in.oden	2010-10-02 19:00:22.957756272 +0200
+@@ -25,6 +25,7 @@
  exec_prefix="@exec_prefix@"
  bindir="@bindir@"
  libdir="@libdir@"
@@ -8,7 +8,7 @@
  includedir="@includedir@"
  
  LIBS="@APRUTIL_EXPORT_LIBS@"
-@@ -35,8 +36,6 @@ DBM_LIBS="@LDADD_dbm_db@ @LDADD_dbm_gdbm
+@@ -35,8 +36,6 @@
  
  APRUTIL_LIBNAME="@APRUTIL_LIBNAME@"
  
@@ -17,16 +17,7 @@
  APR_XML_EXPAT_OLD="@APR_XML_EXPAT_OLD@"
  APU_DB_VERSION="@apu_db_version@"
  
-@@ -61,7 +60,7 @@ Known values for OPTION are:
-   --dbm-libs        print additional library information to link with DBM
-   --srcdir          print APR-util source directory
-   --link-ld         print link switch(es) for linking to APR-util
--  --link-libtool    print the libtool inputs for linking to APR-util
-+  --link-libtool    alias for --link-ld
-   --apu-la-file     print the path to the .la file, if available
-   --old-expat       indicate if APR-util was built against an old expat
-   --db-version      print the DB version
-@@ -83,15 +82,7 @@ if test $# -eq 0; then
+@@ -83,15 +82,7 @@
      exit 1
  fi
  
@@ -43,7 +34,7 @@
  
  flags=""
  
-@@ -131,66 +122,30 @@ while test $# -gt 0; do
+@@ -131,32 +122,17 @@
      flags="$flags $DBM_LIBS"
      ;;
      --includedir)
@@ -79,18 +70,19 @@
      exit 0
      ;;
      --version)
-     echo $APRUTIL_DOTTED_VERSION
+@@ -164,33 +140,13 @@
      exit 0
      ;;
--    --link-ld)
+     --link-ld)
 -    if test "$location" = "installed"; then
 -        ### avoid using -L if libdir is a "standard" location like /usr/lib
 -        flags="$flags -L$libdir -l$APRUTIL_LIBNAME"
 -    else
 -        flags="$flags -L$APU_BUILD_DIR -l$APRUTIL_LIBNAME"
 -    fi
--    ;;
--    --link-libtool)
++    flags="$flags -l$APRUTIL_LIBNAME"
+     ;;
+     --link-libtool)
 -    # If the LA_FILE exists where we think it should be, use it.  If we're
 -    # installed and the LA_FILE does not exist, assume to use -L/-l
 -    # (the LA_FILE may not have been installed).  If we're building ourselves,
@@ -105,16 +97,13 @@
 -    else
 -        flags="$flags $LA_FILE"
 -    fi
-+    --link-ld|--link-libtool)
-+    flags="$flags -l$APRUTIL_LIBNAME"
++    flags="$flags $LA_FILE"
      ;;
      --apu-la-file)
 -    if test -f "$LA_FILE"; then
 -        flags="$flags $LA_FILE"
 -    fi
-+    #flags="$flags $LA_FILE"
-+    echo "ERROR: Mandriva does not provide the $LA_FILE file." >&2
-+    exit 1
++    flags="$flags $LA_FILE"
      ;;
      --old-expat)
      if test ! -n "$APR_XML_EXPAT_OLD"; then
