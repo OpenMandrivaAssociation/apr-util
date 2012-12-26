@@ -31,7 +31,7 @@
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
 Version:	1.5.1
-Release:	1
+Release:	2
 License:	Apache License
 Group:		System/Libraries
 URL:		http://apr.apache.org/
@@ -40,6 +40,7 @@ Source1:	http://www.apache.org/dist/apr/apr-util-%{version}.tar.gz.asc
 Patch0:		apr-util-1.2.2-config.diff
 Patch1:		apr-util-1.2.7-link.diff
 Patch2:		apr-util-1.3.12-linkage_fix.diff
+Patch3:		apr-util-1.5.1-no-libtool.la.patch
 BuildRequires:	apr-devel >= 1:1.4.5
 BuildRequires:	autoconf automake libtool
 BuildRequires:	doxygen
@@ -247,6 +248,7 @@ library of C data structures and routines.
 %patch0 -p0 -b .config
 %patch1 -p0 -b .link
 %patch2 -p0 -b .linkage_fix
+%patch3 -p1 -b .libtoolsucks~
 
 cat >> config.layout << EOF
 <Layout NUX>

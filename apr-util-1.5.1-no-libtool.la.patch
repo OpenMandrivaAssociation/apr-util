@@ -1,0 +1,28 @@
+--- apr-util-1.5.1/apu-config.in.bero	2012-12-26 15:14:51.757970136 +0100
++++ apr-util-1.5.1/apu-config.in	2012-12-26 16:14:29.489313310 +0100
+@@ -82,8 +82,6 @@ if test $# -eq 0; then
+     exit 1
+ fi
+ 
+-LA_FILE="${libdir}/lib${APRUTIL_LIBNAME}.la"
+-
+ flags=""
+ 
+ while test $# -gt 0; do
+@@ -139,15 +137,9 @@ while test $# -gt 0; do
+     echo $APRUTIL_DOTTED_VERSION
+     exit 0
+     ;;
+-    --link-ld)
++    --link-ld|--link-libtool|--apu-la-file)
+     flags="$flags -l$APRUTIL_LIBNAME"
+     ;;
+-    --link-libtool)
+-    flags="$flags $LA_FILE"
+-    ;;
+-    --apu-la-file)
+-    flags="$flags $LA_FILE"
+-    ;;
+     --old-expat)
+     if test ! -n "$APR_XML_EXPAT_OLD"; then
+         echo "no"
