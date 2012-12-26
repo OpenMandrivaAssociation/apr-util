@@ -30,8 +30,8 @@
 
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
-Version:	1.4.1
-Release:	2
+Version:	1.5.1
+Release:	1
 License:	Apache License
 Group:		System/Libraries
 URL:		http://apr.apache.org/
@@ -43,15 +43,14 @@ Patch2:		apr-util-1.3.12-linkage_fix.diff
 BuildRequires:	apr-devel >= 1:1.4.5
 BuildRequires:	autoconf automake libtool
 BuildRequires:	doxygen
-BuildRequires:	expat-devel
-BuildRequires:	libxslt-devel
-BuildRequires:	nss-devel
-BuildRequires:	nspr-devel
-BuildRequires:	openssl-devel
+BuildRequires:	pkgconfig(expat)
+BuildRequires:	pkgconfig(libxslt)
+BuildRequires:	pkgconfig(nss)
+BuildRequires:	pkgconfig(nspr)
+BuildRequires:	pkgconfig(libssl)
 BuildRequires:	pam-devel
 BuildRequires:	python
 BuildRequires:	readline-devel
-BuildRequires:	termcap-devel
 %if %{build_apr_dbd_ldap}
 BuildRequires:	openldap-devel
 BuildRequires:	db-devel
