@@ -56,7 +56,7 @@ BuildRequires:	pkgconfig(nss)
 BuildRequires:	pkgconfig(nspr)
 %if %{build_apr_dbd_ldap}
 BuildRequires:	openldap-devel
-BuildRequires:	db53-devel
+BuildRequires:	db-devel
 %endif
 %if %{build_apr_dbd_freetds}
 BuildRequires:	freetds-devel
@@ -77,7 +77,7 @@ BuildRequires:	sqlite3-devel
 BuildRequires:	unixODBC-devel
 %endif
 %if %{build_apr_dbm_db}
-BuildRequires:	db53-devel
+BuildRequires:	db-devel
 %endif
 
 %if %{build_apr_dbd_pgsql}
