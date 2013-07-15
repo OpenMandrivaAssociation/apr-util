@@ -1,5 +1,7 @@
 removed_sources:
   apr-util-1.4.1.tar.gz: ca4db631d186ea13526fd087aebc06799d4c5415
-sources:
   apr-util-1.5.1.tar.gz: c55556c06dd44f3b719356cff3fc725c370a3832
+sources:
   apr-util-1.5.1.tar.gz.asc: 5842ffedcb36dcaedf4139d0371851f40438853b
+  apr-util-1.5.2.tar.bz2: 67139f51ee6c484f3f1b7b3edc0b00dae3640b0a
+  apr-util-1.5.2.tar.bz2.asc: c1f8efeb1232233da6c8a5079493005bf04c88ea
