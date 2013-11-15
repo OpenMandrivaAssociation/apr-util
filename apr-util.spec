@@ -1,28 +1,13 @@
-%define build_apr_dbd_ldap 1
-%define build_apr_dbd_freetds 1
-%define build_apr_dbd_mysql 1
-%define build_apr_dbd_oracle 0
-%define build_apr_dbd_pgsql 1
-%define build_apr_dbd_sqlite3 1
-%define build_apr_dbd_odbc 1
-%define build_apr_dbm_db 1
-
-%{?_with_apr_dbd_ldap: %{expand: %%global build_apr_dbd_ldap 1}}
-%{?_without_apr_dbd_ldap: %{expand: %%global build_apr_dbd_ldap 0}}
-%{?_with_apr_dbd_freetds: %{expand: %%global build_apr_dbd_freetds 1}}
-%{?_without_apr_dbd_freetds: %{expand: %%global build_apr_dbd_freetds 0}}
-%{?_with_apr_dbd_mysql: %{expand: %%global build_apr_dbd_mysql 1}}
-%{?_without_apr_dbd_mysql: %{expand: %%global build_apr_dbd_mysql 0}}
-%{?_with_apr_dbd_oracle: %{expand: %%global build_apr_dbd_oracle 1}}
-%{?_without_apr_dbd_oracle: %{expand: %%global build_apr_dbd_oracle 0}}
-%{?_with_apr_dbd_pgsql: %{expand: %%global build_apr_dbd_pgsql 1}}
-%{?_without_apr_dbd_pgsql: %{expand: %%global build_apr_dbd_pgsql 0}}
-%{?_with_apr_dbd_sqlite3: %{expand: %%global build_apr_dbd_sqlite3 1}}
-%{?_without_apr_dbd_sqlite3: %{expand: %%global build_apr_dbd_sqlite3 0}}
-%{?_with_apr_dbd_odbc: %{expand: %%global build_apr_dbd_odbc 1}}
-%{?_without_apr_dbd_odbc: %{expand: %%global build_apr_dbd_odbc 0}}
-%{?_with_apr_dbm_db: %{expand: %%global build_apr_dbm_db 1}}
-%{?_without_apr_dbm_db: %{expand: %%global build_apr_dbm_db 0}}
+%bcond_without dbd_ldap
+%bcond_without dbd_freetds
+%bcond_without dbd_mysql
+# disable
+%bcond_with dbd_oracle
+# 
+%bcond_without dbd_sqlite3
+%bcond_without dbd_psql
+%bcond_without dbd_odbc
+%bcond_without dbm_db
 
 %define api	1
 %define major	0
@@ -54,33 +39,33 @@ BuildRequires:	pkgconfig(libssl)
 BuildRequires:	pkgconfig(libxslt)
 BuildRequires:	pkgconfig(nss)
 BuildRequires:	pkgconfig(nspr)
-%if %{build_apr_dbd_ldap}
+%if %{with dbd_ldap}
 BuildRequires:	openldap-devel
 BuildRequires:	db-devel
 %endif
-%if %{build_apr_dbd_freetds}
+%if %{with dbd_freetds}
 BuildRequires:	freetds-devel
 %endif
-%if %{build_apr_dbd_mysql}
+%if %{with dbd_mysql}
 BuildRequires:	mysql-devel
 %endif
-%if %{build_apr_dbd_oracle}
+%if %{with dbd_oracle}
 BuildRequires:	oracle-devel
 %endif
-%if %{build_apr_dbd_pgsql}
+%if %{with dbd_psql}
 BuildRequires:	postgresql-devel
 %endif
-%if %{build_apr_dbd_sqlite3}
+%if %{with dbd_sqlite3}
 BuildRequires:	sqlite3-devel
 %endif
-%if %{build_apr_dbd_odbc}
+%if %{with dbd_odbc}
 BuildRequires:	unixODBC-devel
 %endif
-%if %{build_apr_dbm_db}
+%if %{with dbm_db}
 BuildRequires:	db-devel
 %endif
 
-%if %{build_apr_dbd_pgsql}
+%if %{with dbd_psql}
 # stupid postgresql... stupid build system...
 # this is needed due to the postgresql packaging and due to bugs like this:
 # https://qa.mandriva.com/show_bug.cgi?id=52527
@@ -117,7 +102,7 @@ You can build %{name} with some conditional build swithes;
 --with[out] apr_dbd_odbc	apr_dbd_odbc support (enabled)
 --with[out] apr_dbm_db		apr_dbm_db support (enabled)
 
-%if %{build_apr_dbd_ldap}
+%if %{with dbd_ldap}
 %package	dbd-ldap
 Summary:	DBD driver for OpenLDAP
 Group:		System/Libraries
@@ -128,7 +113,7 @@ Requires:	%{libname} >= %{version}-%{release}
 DBD driver for OpenLDAP.
 %endif
 
-%if %{build_apr_dbd_pgsql}
+%if %{with dbd_psql}
 %package	dbd-pgsql
 Summary:	DBD driver for PostgreSQL
 Group:		System/Libraries
@@ -139,7 +124,7 @@ Requires:	%{libname} >= %{version}-%{release}
 DBD driver for PostgreSQL.
 %endif
 
-%if %{build_apr_dbd_mysql}
+%if %{with dbd_mysql}
 %package	dbd-mysql
 Summary:	DBD driver for MySQL
 Group:		System/Libraries
@@ -150,7 +135,7 @@ Requires:	%{libname} >= %{version}-%{release}
 DBD driver for MySQL.
 %endif
 
-%if %{build_apr_dbd_sqlite3}
+%if %{with dbd_sqlite3}
 %package	dbd-sqlite3
 Summary:	DBD driver for SQLite 3
 Group:		System/Libraries
@@ -161,7 +146,7 @@ Requires:	%{libname} >= %{version}-%{release}
 DBD driver for SQLite 3.
 %endif
 
-%if %{build_apr_dbd_freetds}
+%if %{with dbd_freetds}
 %package	dbd-freetds
 Summary:	DBD driver for FreeTDS
 Group:		System/Libraries
@@ -172,7 +157,7 @@ Requires:	%{libname} >= %{version}-%{release}
 DBD driver for FreeTDS.
 %endif
 
-%if %{build_apr_dbd_oracle}
+%if %{with dbd_oracle}
 %package	dbd-oracle
 Summary:	DBD driver for Oracle
 Group:		System/Libraries
@@ -183,7 +168,7 @@ Requires:	%{libname} >= %{version}-%{release}
 DBD driver for Oracle.
 %endif
 
-%if %{build_apr_dbd_odbc}
+%if %{with dbd_odbc}
 %package	dbd-odbc
 Summary:	DBD driver for unixODBC
 Group:		System/Libraries
@@ -194,7 +179,7 @@ Requires:	%{libname} >= %{version}-%{release}
 DBD driver for unixODBC.
 %endif
 
-%if %{build_apr_dbm_db}
+%if %{with dbm_db}
 %package	dbm-db
 Summary:	DBD driver for Berkley BD
 Group:		System/Libraries
@@ -295,28 +280,28 @@ EOF
 	--includedir=%{_includedir}/apr-%{api} \
 	--with-installbuilddir=%{_libdir}/apr-%{api}/build \
 	--enable-layout=NUX \
-%if %{build_apr_dbd_ldap}
+%if %{with dbd_ldap}
 	--with-ldap \
 %endif
-%if %{build_apr_dbd_freetds}
+%if %{with dbd_freetds}
 	--with-freetds=%{_prefix} \
 %endif
-%if %{build_apr_dbd_mysql}
+%if %{with dbd_mysql}
 	--with-mysql=%{_prefix} \
 %endif
-%if %{build_apr_dbd_oracle}
+%if %{with dbd_oracle}
 	--with-oracle \
 %endif
-%if %{build_apr_dbd_pgsql}
+%if %{with dbd_psql}
 	--with-pgsql=%{_prefix} \
 %endif
-%if %{build_apr_dbd_sqlite3}
+%if %{with dbd_sqlite3}
 	--with-sqlite3=%{_prefix} \
 %endif
-%if %{build_apr_dbd_odbc}
+%if %{with dbd_odbc}
 	--with-odbc=%{_prefix} \
 %endif
-%if %{build_apr_dbm_db}
+%if %{with dbm_db}
 	--with-berkeley-db \
 %endif
 	--without-sqlite2 \
@@ -366,42 +351,42 @@ rm -f %{buildroot}%{_libdir}/aprutil.exp
 %{_libdir}/libaprutil-%{api}.so
 %{_libdir}/pkgconfig/*.pc
 
-%if %{build_apr_dbd_ldap}
+%if %{with dbd_ldap}
 %files dbd-ldap
 %{_libdir}/apr-util-%{api}/apr_ldap*.so
 %endif
 
-%if %{build_apr_dbd_mysql}
+%if %{with dbd_mysql}
 %files dbd-mysql
 %{_libdir}/apr-util-%{api}/apr_dbd_mysql*.so
 %endif
 
-%if %{build_apr_dbd_pgsql}
+%if %{with dbd_psql}
 %files dbd-pgsql
 %{_libdir}/apr-util-%{api}/apr_dbd_pgsql*.so
 %endif
 
-%if %{build_apr_dbd_sqlite3}
+%if %{with dbd_sqlite3}
 %files dbd-sqlite3
 %{_libdir}/apr-util-%{api}/apr_dbd_sqlite3*.so
 %endif
 
-%if %{build_apr_dbd_freetds}
+%if %{with dbd_freetds}
 %files dbd-freetds
 %{_libdir}/apr-util-%{api}/apr_dbd_freetds*.so
 %endif
 
-%if %{build_apr_dbd_oracle}
+%if %{with dbd_oracle}
 %files dbd-oracle
 %{_libdir}/apr-util-%{api}/apr_dbd_oracle*.so
 %endif
 
-%if %{build_apr_dbd_odbc}
+%if %{with dbd_odbc}
 %files dbd-odbc
 %{_libdir}/apr-util-%{api}/apr_dbd_odbc*.so
 %endif
 
-%if %{build_apr_dbm_db}
+%if %{with dbm_db}
 %files dbm-db
 %{_libdir}/apr-util-%{api}/apr_dbm_db*.so
 %endif
