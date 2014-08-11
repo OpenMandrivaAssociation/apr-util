@@ -262,7 +262,7 @@ perl -pi -e "s|/lib\b|/%{_lib}|g" build/*.m4
 export WANT_AUTOCONF_2_5=1
 rm -f configure
 libtoolize --copy --force; aclocal; autoconf --force
-python build/gen-build.py make
+python2 build/gen-build.py make
 
 sed -i -e '/OBJECTS_all/s, dbd/apr_dbd_[^ ]*\.lo,,g' build-outputs.mk
 
