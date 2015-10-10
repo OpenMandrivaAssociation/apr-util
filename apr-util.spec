@@ -16,8 +16,8 @@
 
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
-Version:	1.5.3
-Release:	10
+Version:	1.5.4
+Release:	1
 License:	Apache License
 Group:		System/Libraries
 Url:		http://apr.apache.org/
@@ -321,9 +321,6 @@ popd
 %install
 %makeinstall_std
 
-# Documentation
-rm -rf html; cp -rp docs/dox/html html
-
 # Remove unnecessary exports from dependency_libs
 sed -ri '/^dependency_libs/{s,-l(pq|sqlite[0-9]|mysqlclient_r|rt|dl|uuid) ,,g}' %{buildroot}%{_libdir}/libapr*.la
 
@@ -345,7 +342,6 @@ rm -f %{buildroot}%{_libdir}/aprutil.exp
 
 %files -n %{devname}
 %doc CHANGES LICENSE
-%doc --parents html
 %{_bindir}/apu-%{api}-config
 %{_includedir}/apr-%{api}/*.h
 %{_libdir}/libaprutil-%{api}.so
