@@ -1,5 +1,6 @@
 %bcond_without dbd_ldap
-%bcond_without dbd_freetds
+# No longer supported
+%bcond_with dbd_freetds
 %bcond_without dbd_mysql
 # disable
 %bcond_with dbd_oracle
@@ -16,8 +17,8 @@
 
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
-Version:	1.5.4
-Release:	2.2
+Version:	1.6.1
+Release:	1
 License:	Apache License
 Group:		System/Libraries
 Url:		http://apr.apache.org/
@@ -45,6 +46,8 @@ BuildRequires:	db-devel
 %endif
 %if %{with dbd_freetds}
 BuildRequires:	freetds-devel
+%else
+Obsoletes:	%{name}-dbd-freetds < %{EVRD}
 %endif
 %if %{with dbd_mysql}
 BuildRequires:	mysql-devel
@@ -62,7 +65,7 @@ BuildRequires:	sqlite3-devel
 BuildRequires:	unixODBC-devel
 %endif
 %if %{with dbm_db}
-BuildRequires:	db-devel
+BuildRequires:	db62-devel
 %endif
 
 %if %{with dbd_psql}
@@ -220,7 +223,7 @@ library of C data structures and routines.
 
 %prep
 %setup -q -n %{name}-%{version}
-%patch0 -p0 -b .config
+%patch0 -p1 -b .config
 %patch1 -p0 -b .link
 %patch2 -p0 -b .linkage_fix
 %patch3 -p1 -b .libtoolsucks~
@@ -274,7 +277,7 @@ ac_cv_lib_sqlite_sqlite_open=no
 ac_cv_ldap_set_rebind_proc_style=three
 EOF
 
-%configure2_5x \
+%configure \
 	--cache-file=config.cache \
 	--with-apr=%{_prefix} \
 	--includedir=%{_includedir}/apr-%{api} \
