@@ -40,6 +40,7 @@ BuildRequires:	pkgconfig(libssl)
 BuildRequires:	pkgconfig(libxslt)
 BuildRequires:	pkgconfig(nss)
 BuildRequires:	pkgconfig(nspr)
+BuildRequires:	pkgconfig(uuid)
 BuildRequires:	pkgconfig(zlib)
 %if %{with dbd_ldap}
 BuildRequires:	openldap-devel
