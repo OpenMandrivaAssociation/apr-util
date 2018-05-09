@@ -313,6 +313,11 @@ EOF
 	--with-openssl=%{_prefix} \
 	--with-nss=%{_prefix}
 
+# configure incorrectly "succeeds" if it can't link to a database library
+# even when --with-THAT_DB was specified. Let's dump config.log to see
+# where stuff is going wrong in abf
+cat config.log
+
 %make
 make dox
 
