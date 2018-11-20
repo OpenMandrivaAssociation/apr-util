@@ -45,7 +45,6 @@ BuildRequires:	pkgconfig(uuid)
 BuildRequires:	pkgconfig(zlib)
 %if %{with dbd_ldap}
 BuildRequires:	openldap-devel
-BuildRequires:	db-devel
 %endif
 %if %{with dbd_freetds}
 BuildRequires:	freetds-devel
