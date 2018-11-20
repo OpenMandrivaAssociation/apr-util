@@ -35,6 +35,7 @@ BuildRequires:	python
 BuildRequires:	pam-devel
 BuildRequires:	readline-devel
 BuildRequires:	pkgconfig(apr-1)
+BuildRequires:	pkgconfig(python2)
 BuildRequires:	pkgconfig(expat)
 BuildRequires:	pkgconfig(libssl)
 BuildRequires:	pkgconfig(libxslt)
