@@ -18,7 +18,7 @@
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
 Version:	1.6.1
-Release:	2
+Release:	3
 License:	Apache License
 Group:		System/Libraries
 Url:		http://apr.apache.org/
@@ -67,7 +67,7 @@ BuildRequires:	sqlite3-devel
 BuildRequires:	unixODBC-devel
 %endif
 %if %{with dbm_db}
-BuildRequires:	db62-devel
+BuildRequires:	db-devel >= 18.1
 %endif
 
 %if %{with dbd_psql}
