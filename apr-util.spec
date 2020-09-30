@@ -18,7 +18,7 @@
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
 Version:	1.6.1
-Release:	3
+Release:	4
 License:	Apache License
 Group:		System/Libraries
 Url:		http://apr.apache.org/
@@ -320,17 +320,17 @@ EOF
 # where stuff is going wrong in abf
 cat config.log
 
-%make
+%make_build
 make dox
 
 %check
-pushd test
+cd test
     # tests seem to break
     make check || true
-popd
+cd -
 
 %install
-%makeinstall_std
+%make_install
 
 # Remove unnecessary exports from dependency_libs
 sed -ri '/^dependency_libs/{s,-l(pq|sqlite[0-9]|mysqlclient_r|rt|dl|uuid) ,,g}' %{buildroot}%{_libdir}/libapr*.la
@@ -403,4 +403,3 @@ rm -f %{buildroot}%{_libdir}/aprutil.exp
 
 %files nss
 %{_libdir}/apr-util-%{api}/apr_crypto_nss*.so
-
