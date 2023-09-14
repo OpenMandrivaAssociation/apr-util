@@ -8,17 +8,18 @@
 %bcond_without dbd_sqlite3
 %bcond_without dbd_psql
 %bcond_without dbd_odbc
-%bcond_without dbm_db
+%bcond_with dbm_db
 
 %define api	1
 %define major	0
-%define libname %mklibname apr-util %{api} %{major}
+%define oldlibname %mklibname apr-util 1 0
+%define libname %mklibname apr-util
 %define devname %mklibname -d apr-util
 
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
-Version:	1.6.1
-Release:	5
+Version:	1.6.3
+Release:	1
 License:	Apache License
 Group:		System/Libraries
 Url:		http://apr.apache.org/
@@ -35,7 +36,7 @@ BuildRequires:	python
 BuildRequires:	pam-devel
 BuildRequires:	readline-devel
 BuildRequires:	pkgconfig(apr-1)
-BuildRequires:	pkgconfig(python2)
+BuildRequires:	pkgconfig(python3)
 BuildRequires:	pkgconfig(expat)
 BuildRequires:	pkgconfig(libssl)
 BuildRequires:	pkgconfig(libxslt)
@@ -44,7 +45,7 @@ BuildRequires:	pkgconfig(nspr)
 BuildRequires:	pkgconfig(uuid)
 BuildRequires:	pkgconfig(zlib)
 %if %{with dbd_ldap}
-BuildRequires:	openldap-devel
+BuildRequires:	pkgconfig(ldap)
 %endif
 %if %{with dbd_freetds}
 BuildRequires:	freetds-devel
@@ -87,6 +88,7 @@ for XML, LDAP, database interfaces, URI parsing and more.
 Summary:	Apache Portable Runtime Utility library
 Group: 		System/Libraries
 Obsoletes:	%{_lib}apr-util1
+%rename %{oldlibname}
 
 %description -n	%{libname}
 The mission of the Apache Portable Runtime (APR) is to provide a
@@ -226,7 +228,7 @@ library of C data structures and routines.
 %prep
 %setup -q -n %{name}-%{version}
 %patch0 -p1 -b .config
-%patch1 -p0 -b .link
+%patch1 -p1 -b .link
 %patch2 -p0 -b .linkage_fix
 %patch3 -p1 -b .libtoolsucks~
 
@@ -267,7 +269,7 @@ perl -pi -e "s|/lib\b|/%{_lib}|g" build/*.m4
 export WANT_AUTOCONF_2_5=1
 rm -f configure
 libtoolize --copy --force; aclocal; autoconf --force
-python2 build/gen-build.py make
+python build/gen-build.py make
 
 sed -i -e '/OBJECTS_all/s, dbd/apr_dbd_[^ ]*\.lo,,g' build-outputs.mk
 
