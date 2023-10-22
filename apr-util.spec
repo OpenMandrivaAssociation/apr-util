@@ -8,7 +8,7 @@
 %bcond_without dbd_sqlite3
 %bcond_without dbd_psql
 %bcond_without dbd_odbc
-%bcond_with dbm_db
+%bcond_without dbm_db
 
 %define api	1
 %define major	0
@@ -19,7 +19,7 @@
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
 Version:	1.6.3
-Release:	1
+Release:	2
 License:	Apache License
 Group:		System/Libraries
 Url:		http://apr.apache.org/
@@ -29,6 +29,7 @@ Patch0:		apr-util-1.2.2-config.diff
 Patch1:		apr-util-1.2.7-link.diff
 Patch2:		apr-util-1.3.12-linkage_fix.diff
 Patch3:		apr-util-1.5.1-no-libtool.la.patch
+Patch4:		apr-util-1.6.3-db-18.x.patch
 
 BuildRequires:	doxygen
 BuildRequires:	libtool
@@ -226,11 +227,7 @@ of the Apache Portable Runtime (APR) is to provide a free
 library of C data structures and routines.
 
 %prep
-%setup -q -n %{name}-%{version}
-%patch0 -p1 -b .config
-%patch1 -p1 -b .link
-%patch2 -p0 -b .linkage_fix
-%patch3 -p1 -b .libtoolsucks~
+%autosetup -p1
 
 cat >> config.layout << EOF
 <Layout NUX>

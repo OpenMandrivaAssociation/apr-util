@@ -1,0 +1,1358 @@
+diff -up apr-util-1.6.3/build/dbm.m4.5~ apr-util-1.6.3/build/dbm.m4
+--- apr-util-1.6.3/build/dbm.m4.5~	2013-11-23 19:00:53.000000000 +0100
++++ apr-util-1.6.3/build/dbm.m4	2023-10-23 01:57:43.083315469 +0200
+@@ -87,7 +87,7 @@ AC_DEFUN([APU_CHECK_BERKELEY_DB], [
+       ;;
+       * )
+         if test -d $bdb_place; then
+-          LDFLAGS="$LDFLAGS -L$bdb_place/lib"
++          LDFLAGS="$LDFLAGS -L$bdb_place/lib64"
+           CPPFLAGS="$CPPFLAGS -I$bdb_place/include"
+         else
+           AC_MSG_CHECKING([for Berkeley DB $bdb_version in $bdb_place])
+@@ -112,7 +112,7 @@ AC_DEFUN([APU_CHECK_BERKELEY_DB], [
+         changequote([,])
+         unset $cache_id
+         AC_CHECK_HEADER([$bdb_header], [
+-          if test "$1" = "3" -o "$1" = "4" -o "$1" = "5" -o "$1" = "6"; then
++          if test "$1" = "3" -o "$1" = "4" -o "$1" = "5" -o "$1" = "6" -o "$1" = "18"; then
+             # We generate a separate cache variable for each prefix and libname
+             # we search under.  That way, we avoid caching information that
+             # changes if the user runs `configure' with a different set of
+@@ -183,7 +183,7 @@ AC_DEFUN([APU_CHECK_BERKELEY_DB], [
+     ;;
+   *)
+     APR_ADDTO(APRUTIL_INCLUDES, [-I$found/include])
+-    APR_ADDTO(APRUTIL_LDFLAGS, [-L$found/lib])
++    APR_ADDTO(APRUTIL_LDFLAGS, [-L$found/lib64])
+     apu_db_header=$bdb_header
+     apu_db_lib=$bdb_libname
+     apu_have_db=1
+@@ -212,10 +212,10 @@ dnl   function, then this macro assumes
+ 
+ dnl   NOTE: This is pretty messed up.  It seems that the FreeBSD port of
+ dnl   Berkeley DB 4 puts the header file in /usr/local/include/db4, but the
+-dnl   database library in /usr/local/lib, as libdb4.[a|so].  There is no
++dnl   database library in /usr/local/lib64, as libdb4.[a|so].  There is no
+ dnl   /usr/local/include/db.h.  So if you check for /usr/local first, you'll
+ dnl   get the old header file from /usr/include, and the new library from
+-dnl   /usr/local/lib.  Disaster.  Thus this test compares the version constants
++dnl   /usr/local/lib64.  Disaster.  Thus this test compares the version constants
+ dnl   in the db.h header with the ones returned by db_version().
+ 
+ 
+@@ -235,7 +235,7 @@ AC_DEFUN([APU_TRY_BERKELEY_DB],
+ #include <stdlib.h>
+ #include <stdio.h>
+ #include <$apu_try_berkeley_db_header>
+-main ()
++int main ()
+ {
+   int major, minor, patch;
+ 
+@@ -461,11 +461,16 @@ AC_DEFUN([APU_CHECK_DB_ALL], [
+   all_places=$1
+ 
+   # Start version search at version 6.9
+-  db_version=69
++  db_version=181
+   while [[ $db_version -ge 40 ]]
+   do
+-    db_major=`echo $db_version | sed -e 's/.$//'`
+-    db_minor=`echo $db_version | sed -e 's/.//'`
++    if [[ $db_version -ge 100 ]]; then
++      db_major=`echo $db_version | sed -e 's/.$//'`
++      db_minor=`echo $db_version | sed -e 's/..//'`
++    else
++      db_major=`echo $db_version | sed -e 's/.$//'`
++      db_minor=`echo $db_version | sed -e 's/.//'`
++    fi
+     APU_CHECK_DBXY("$all_places", "$db_major", "$db_minor")
+     if test "$apu_have_db" = "1"; then
+       break
+@@ -564,12 +569,12 @@ AC_DEFUN([APU_CHECK_DBM], [
+       saved_cppflags="$CPPFLAGS"
+       saved_ldflags="$LDFLAGS"
+       CPPFLAGS="$CPPFLAGS -I$withval/include"
+-      LDFLAGS="$LDFLAGS -L$withval/lib "
++      LDFLAGS="$LDFLAGS -L$withval/lib64 "
+ 
+       AC_MSG_CHECKING(checking for gdbm in $withval)
+       AC_CHECK_HEADER(gdbm.h, AC_CHECK_LIB(gdbm, gdbm_open, [apu_have_gdbm=1]))
+       if test "$apu_have_gdbm" != "0"; then
+-        APR_ADDTO(APRUTIL_LDFLAGS, [-L$withval/lib])
++        APR_ADDTO(APRUTIL_LDFLAGS, [-L$withval/lib64])
+         APR_ADDTO(APRUTIL_INCLUDES, [-I$withval/include])
+       fi
+       CPPFLAGS="$saved_cppflags"
+@@ -579,7 +584,7 @@ AC_DEFUN([APU_CHECK_DBM], [
+ 
+   AC_ARG_WITH([ndbm], [APR_HELP_STRING([--with-ndbm=PATH], [
+       Find the NDBM header and library in `PATH/include' and 
+-      `PATH/lib'.  If PATH is of the form `HEADER:LIB', then search 
++      `PATH/lib64'.  If PATH is of the form `HEADER:LIB', then search 
+       for header files in HEADER, and the library in LIB.  If you omit
+       the `=PATH' part completely, the configure script will search
+       for NDBM in a number of standard places.])],
+@@ -602,7 +607,7 @@ AC_DEFUN([APU_CHECK_DBM], [
+         ;;
+         *)
+           NDBM_INC="-I$withval/include"
+-          NDBM_LDFLAGS="-L$withval/lib"
++          NDBM_LDFLAGS="-L$withval/lib64"
+           AC_MSG_CHECKING(checking for ndbm includes in $withval)
+         ;;
+       esac
+@@ -652,7 +657,7 @@ AC_DEFUN([APU_CHECK_DBM], [
+   dnl that use it.
+   AC_ARG_WITH([berkeley-db], [APR_HELP_STRING([--with-berkeley-db=PATH],
+       [Find the Berkeley DB header and library in `PATH/include' and
+-      `PATH/lib'.  If PATH is of the form `HEADER:LIB', then search
++      `PATH/lib64'.  If PATH is of the form `HEADER:LIB', then search
+       for header files in HEADER, and the library in LIB.  If you omit
+       the `=PATH' part completely, the configure script will search
+       for Berkeley DB in a number of standard places.])],
+diff -up apr-util-1.6.3/configure.5~ apr-util-1.6.3/configure
+--- apr-util-1.6.3/configure.5~	2023-10-23 01:56:13.224347509 +0200
++++ apr-util-1.6.3/configure	2023-10-23 01:57:50.603396537 +0200
+@@ -876,7 +876,7 @@ datadir='${datarootdir}'
+ sysconfdir='${prefix}/etc'
+ sharedstatedir='${prefix}/com'
+ localstatedir='${prefix}/var'
+-runstatedir='${localstatedir}/run'
++runstatedir='/run'
+ includedir='${prefix}/include'
+ oldincludedir='/usr/include'
+ docdir='${datarootdir}/doc/${PACKAGE}'
+@@ -1426,7 +1426,7 @@ Fine tuning of the installation director
+   --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
+   --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
+   --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
+-  --runstatedir=DIR       modifiable per-process data [LOCALSTATEDIR/run]
++  --runstatedir=DIR       modifiable per-process data [/run]
+   --libdir=DIR            object code libraries [EPREFIX/lib]
+   --includedir=DIR        C header files [PREFIX/include]
+   --oldincludedir=DIR     C header files for non-gcc [/usr/include]
+@@ -1482,13 +1482,13 @@ Optional Packages:
+                           for some X=0,...,9
+   --with-gdbm=DIR         enable GDBM support
+   --with-ndbm=PATH        Find the NDBM header and library in `PATH/include'
+-                          and `PATH/lib'. If PATH is of the form `HEADER:LIB',
+-                          then search for header files in HEADER, and the
+-                          library in LIB. If you omit the `=PATH' part
+-                          completely, the configure script will search for
+-                          NDBM in a number of standard places.
++                          and `PATH/lib64'. If PATH is of the form
++                          `HEADER:LIB', then search for header files in
++                          HEADER, and the library in LIB. If you omit the
++                          `=PATH' part completely, the configure script will
++                          search for NDBM in a number of standard places.
+   --with-berkeley-db=PATH Find the Berkeley DB header and library in
+-                          `PATH/include' and `PATH/lib'. If PATH is of the
++                          `PATH/include' and `PATH/lib64'. If PATH is of the
+                           form `HEADER:LIB', then search for header files in
+                           HEADER, and the library in LIB. If you omit the
+                           `=PATH' part completely, the configure script will
+@@ -1878,7 +1878,7 @@ else $as_nop
+ #ifdef __cplusplus
+ extern "C"
+ #endif
+-char $2 ();
++__attribute__ ((used)) char $2 ();
+ /* The GNU C library defines this for functions which it implements
+     to always fail with ENOSYS.  Some functions are actually named
+     something starting with __ and the normal name is an alias.  */
+@@ -2868,6 +2868,9 @@ ac_config_headers="$ac_config_headers in
+ 
+ 
+ 
++
++
++
+   rm -f config.nice
+   cat >config.nice<<EOF
+ #! /bin/sh
+@@ -3439,6 +3442,213 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS con
+ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ ac_compiler_gnu=$ac_cv_c_compiler_gnu
+ if test -n "$ac_tool_prefix"; then
++  # Extract the first word of "${ac_tool_prefix}cc", so it can be a program name with args.
++set dummy ${ac_tool_prefix}cc; ac_word=$2
++{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
++printf %s "checking for $ac_word... " >&6; }
++if test ${ac_cv_prog_CC+y}
++then :
++  printf %s "(cached) " >&6
++else $as_nop
++  if test -n "$CC"; then
++  ac_cv_prog_CC="$CC" # Let the user override the test.
++else
++as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
++for as_dir in $PATH
++do
++  IFS=$as_save_IFS
++  case $as_dir in #(((
++    '') as_dir=./ ;;
++    */) ;;
++    *) as_dir=$as_dir/ ;;
++  esac
++    for ac_exec_ext in '' $ac_executable_extensions; do
++  if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
++    ac_cv_prog_CC="${ac_tool_prefix}cc"
++    printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
++    break 2
++  fi
++done
++  done
++IFS=$as_save_IFS
++
++fi
++fi
++CC=$ac_cv_prog_CC
++if test -n "$CC"; then
++  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $CC" >&5
++printf "%s\n" "$CC" >&6; }
++else
++  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
++printf "%s\n" "no" >&6; }
++fi
++
++
++fi
++if test -z "$ac_cv_prog_CC"; then
++  ac_ct_CC=$CC
++  # Extract the first word of "cc", so it can be a program name with args.
++set dummy cc; ac_word=$2
++{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
++printf %s "checking for $ac_word... " >&6; }
++if test ${ac_cv_prog_ac_ct_CC+y}
++then :
++  printf %s "(cached) " >&6
++else $as_nop
++  if test -n "$ac_ct_CC"; then
++  ac_cv_prog_ac_ct_CC="$ac_ct_CC" # Let the user override the test.
++else
++as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
++for as_dir in $PATH
++do
++  IFS=$as_save_IFS
++  case $as_dir in #(((
++    '') as_dir=./ ;;
++    */) ;;
++    *) as_dir=$as_dir/ ;;
++  esac
++    for ac_exec_ext in '' $ac_executable_extensions; do
++  if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
++    ac_cv_prog_ac_ct_CC="cc"
++    printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
++    break 2
++  fi
++done
++  done
++IFS=$as_save_IFS
++
++fi
++fi
++ac_ct_CC=$ac_cv_prog_ac_ct_CC
++if test -n "$ac_ct_CC"; then
++  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_ct_CC" >&5
++printf "%s\n" "$ac_ct_CC" >&6; }
++else
++  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
++printf "%s\n" "no" >&6; }
++fi
++
++  if test "x$ac_ct_CC" = x; then
++    CC=""
++  else
++    case $cross_compiling:$ac_tool_warned in
++yes:)
++{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: using cross tools not prefixed with host triplet" >&5
++printf "%s\n" "$as_me: WARNING: using cross tools not prefixed with host triplet" >&2;}
++ac_tool_warned=yes ;;
++esac
++    CC=$ac_ct_CC
++  fi
++else
++  CC="$ac_cv_prog_CC"
++fi
++
++if test -z "$CC"; then
++  if test -n "$ac_tool_prefix"; then
++  # Extract the first word of "${ac_tool_prefix}clang", so it can be a program name with args.
++set dummy ${ac_tool_prefix}clang; ac_word=$2
++{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
++printf %s "checking for $ac_word... " >&6; }
++if test ${ac_cv_prog_CC+y}
++then :
++  printf %s "(cached) " >&6
++else $as_nop
++  if test -n "$CC"; then
++  ac_cv_prog_CC="$CC" # Let the user override the test.
++else
++as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
++for as_dir in $PATH
++do
++  IFS=$as_save_IFS
++  case $as_dir in #(((
++    '') as_dir=./ ;;
++    */) ;;
++    *) as_dir=$as_dir/ ;;
++  esac
++    for ac_exec_ext in '' $ac_executable_extensions; do
++  if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
++    ac_cv_prog_CC="${ac_tool_prefix}clang"
++    printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
++    break 2
++  fi
++done
++  done
++IFS=$as_save_IFS
++
++fi
++fi
++CC=$ac_cv_prog_CC
++if test -n "$CC"; then
++  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $CC" >&5
++printf "%s\n" "$CC" >&6; }
++else
++  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
++printf "%s\n" "no" >&6; }
++fi
++
++
++fi
++if test -z "$ac_cv_prog_CC"; then
++  ac_ct_CC=$CC
++  # Extract the first word of "clang", so it can be a program name with args.
++set dummy clang; ac_word=$2
++{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
++printf %s "checking for $ac_word... " >&6; }
++if test ${ac_cv_prog_ac_ct_CC+y}
++then :
++  printf %s "(cached) " >&6
++else $as_nop
++  if test -n "$ac_ct_CC"; then
++  ac_cv_prog_ac_ct_CC="$ac_ct_CC" # Let the user override the test.
++else
++as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
++for as_dir in $PATH
++do
++  IFS=$as_save_IFS
++  case $as_dir in #(((
++    '') as_dir=./ ;;
++    */) ;;
++    *) as_dir=$as_dir/ ;;
++  esac
++    for ac_exec_ext in '' $ac_executable_extensions; do
++  if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
++    ac_cv_prog_ac_ct_CC="clang"
++    printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
++    break 2
++  fi
++done
++  done
++IFS=$as_save_IFS
++
++fi
++fi
++ac_ct_CC=$ac_cv_prog_ac_ct_CC
++if test -n "$ac_ct_CC"; then
++  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_ct_CC" >&5
++printf "%s\n" "$ac_ct_CC" >&6; }
++else
++  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
++printf "%s\n" "no" >&6; }
++fi
++
++  if test "x$ac_ct_CC" = x; then
++    CC=""
++  else
++    case $cross_compiling:$ac_tool_warned in
++yes:)
++{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: using cross tools not prefixed with host triplet" >&5
++printf "%s\n" "$as_me: WARNING: using cross tools not prefixed with host triplet" >&2;}
++ac_tool_warned=yes ;;
++esac
++    CC=$ac_ct_CC
++  fi
++else
++  CC="$ac_cv_prog_CC"
++fi
++
++fi
++if test -z "$CC"; then
++  if test -n "$ac_tool_prefix"; then
+   # Extract the first word of "${ac_tool_prefix}gcc", so it can be a program name with args.
+ set dummy ${ac_tool_prefix}gcc; ac_word=$2
+ { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+@@ -3540,6 +3750,7 @@ else
+   CC="$ac_cv_prog_CC"
+ fi
+ 
++fi
+ if test -z "$CC"; then
+           if test -n "$ac_tool_prefix"; then
+     # Extract the first word of "${ac_tool_prefix}cc", so it can be a program name with args.
+@@ -4671,7 +4882,7 @@ printf "%s\n" "$apr_found" >&6; }
+       APR_BUILD_DIR="`cd $APR_BUILD_DIR && pwd`"
+ 
+   APR_INCLUDES="`$apr_config --includes`"
+-  APR_LIBS="`$apr_config --link-libtool --libs`"
++  APR_LIBS="`$apr_config --link-ld`"
+   APR_SO_EXT="`$apr_config --apr-so-ext`"
+   APR_LIB_TARGET="`$apr_config --apr-lib-target`"
+ 
+@@ -5185,7 +5396,7 @@ fi
+     else
+ 
+       openssl_CPPFLAGS="-I$withval/include"
+-      openssl_LDFLAGS="-L$withval/lib "
++      openssl_LDFLAGS="-L$withval/lib64 "
+ 
+ 
+   if test "x$CPPFLAGS" = "x"; then
+@@ -5325,10 +5536,10 @@ fi
+         apu_have_openssl=1
+ 
+   if test "x$APRUTIL_LDFLAGS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$withval/lib\""
+-    APRUTIL_LDFLAGS="-L$withval/lib"
++    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$withval/lib64\""
++    APRUTIL_LDFLAGS="-L$withval/lib64"
+   else
+-    apr_addto_bugger="-L$withval/lib"
++    apr_addto_bugger="-L$withval/lib64"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $APRUTIL_LDFLAGS; do
+@@ -5751,7 +5962,7 @@ fi
+     elif test "x$withval" != "x"; then
+ 
+       nss_CPPFLAGS="-I$withval/include/nss -I$withval/include/nss3 -I$withval/include/nspr -I$withval/include/nspr4 -I$withval/include -I$withval/../public"
+-      nss_LDFLAGS="-L$withval/lib "
++      nss_LDFLAGS="-L$withval/lib64 "
+ 
+ 
+   if test "x$CPPFLAGS" = "x"; then
+@@ -6098,7 +6309,7 @@ fi
+     else
+ 
+       commoncrypto_CPPFLAGS="-I$withval/include"
+-      commoncrypto_LDFLAGS="-L$withval/lib "
++      commoncrypto_LDFLAGS="-L$withval/lib64 "
+ 
+ 
+   if test "x$CPPFLAGS" = "x"; then
+@@ -6238,10 +6449,10 @@ fi
+         apu_have_commoncrypto=1
+ 
+   if test "x$LDFLAGS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting LDFLAGS to \"-L$withval/lib\""
+-    LDFLAGS="-L$withval/lib"
++    test "x$silent" != "xyes" && echo "  setting LDFLAGS to \"-L$withval/lib64\""
++    LDFLAGS="-L$withval/lib64"
+   else
+-    apr_addto_bugger="-L$withval/lib"
++    apr_addto_bugger="-L$withval/lib64"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $LDFLAGS; do
+@@ -12294,10 +12505,7 @@ else $as_nop
+  fi
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+ /* end confdefs.h.  */
+-
+-#ifndef PACKAGE_NAME
+ #include "confdefs.h"
+-#endif
+ 
+ 
+     #ifdef HAVE_LBER_H
+@@ -12481,7 +12689,7 @@ fi
+       saved_cppflags="$CPPFLAGS"
+       saved_ldflags="$LDFLAGS"
+       CPPFLAGS="$CPPFLAGS -I$withval/include"
+-      LDFLAGS="$LDFLAGS -L$withval/lib "
++      LDFLAGS="$LDFLAGS -L$withval/lib64 "
+ 
+       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking checking for gdbm in $withval" >&5
+ printf %s "checking checking for gdbm in $withval... " >&6; }
+@@ -12533,10 +12741,10 @@ fi
+       if test "$apu_have_gdbm" != "0"; then
+ 
+   if test "x$APRUTIL_LDFLAGS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$withval/lib\""
+-    APRUTIL_LDFLAGS="-L$withval/lib"
++    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$withval/lib64\""
++    APRUTIL_LDFLAGS="-L$withval/lib64"
+   else
+-    apr_addto_bugger="-L$withval/lib"
++    apr_addto_bugger="-L$withval/lib64"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $APRUTIL_LDFLAGS; do
+@@ -12606,7 +12814,7 @@ printf %s "checking checking for ndbm in
+         ;;
+         *)
+           NDBM_INC="-I$withval/include"
+-          NDBM_LDFLAGS="-L$withval/lib"
++          NDBM_LDFLAGS="-L$withval/lib64"
+           { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking checking for ndbm includes in $withval" >&5
+ printf %s "checking checking for ndbm includes in $withval... " >&6; }
+         ;;
+@@ -12881,11 +13089,16 @@ then :
+   all_places="$check_places"
+ 
+   # Start version search at version 6.9
+-  db_version=69
++  db_version=181
+   while [ $db_version -ge 40 ]
+   do
+-    db_major=`echo $db_version | sed -e 's/.$//'`
+-    db_minor=`echo $db_version | sed -e 's/.//'`
++    if [ $db_version -ge 100 ]; then
++      db_major=`echo $db_version | sed -e 's/.$//'`
++      db_minor=`echo $db_version | sed -e 's/..//'`
++    else
++      db_major=`echo $db_version | sed -e 's/.$//'`
++      db_minor=`echo $db_version | sed -e 's/.//'`
++    fi
+ 
+   places="$all_places"
+   db_major="$db_major"
+@@ -12933,7 +13146,7 @@ then :
+       ;;
+       * )
+         if test -d $bdb_place; then
+-          LDFLAGS="$LDFLAGS -L$bdb_place/lib"
++          LDFLAGS="$LDFLAGS -L$bdb_place/lib64"
+           CPPFLAGS="$CPPFLAGS -I$bdb_place/include"
+         else
+           { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for Berkeley DB $bdb_version in $bdb_place" >&5
+@@ -12966,7 +13179,7 @@ ac_fn_c_check_header_compile "$LINENO" "
+ if eval test \"x\$"$as_ac_Header"\" = x"yes"
+ then :
+ 
+-          if test ""${db_major}"" = "3" -o ""${db_major}"" = "4" -o ""${db_major}"" = "5" -o ""${db_major}"" = "6"; then
++          if test ""${db_major}"" = "3" -o ""${db_major}"" = "4" -o ""${db_major}"" = "5" -o ""${db_major}"" = "6" -o ""${db_major}"" = "18"; then
+             # We generate a separate cache variable for each prefix and libname
+             # we search under.  That way, we avoid caching information that
+             # changes if the user runs `configure' with a different set of
+@@ -13004,7 +13217,7 @@ else $as_nop
+ #include <stdlib.h>
+ #include <stdio.h>
+ #include <$apu_try_berkeley_db_header>
+-main ()
++int main ()
+ {
+   int major, minor, patch;
+ 
+@@ -13258,10 +13471,10 @@ fi
+ 
+ 
+   if test "x$APRUTIL_LDFLAGS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib\""
+-    APRUTIL_LDFLAGS="-L$found/lib"
++    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib64\""
++    APRUTIL_LDFLAGS="-L$found/lib64"
+   else
+-    apr_addto_bugger="-L$found/lib"
++    apr_addto_bugger="-L$found/lib64"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $APRUTIL_LDFLAGS; do
+@@ -13338,7 +13551,7 @@ fi
+       ;;
+       * )
+         if test -d $bdb_place; then
+-          LDFLAGS="$LDFLAGS -L$bdb_place/lib"
++          LDFLAGS="$LDFLAGS -L$bdb_place/lib64"
+           CPPFLAGS="$CPPFLAGS -I$bdb_place/include"
+         else
+           { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for Berkeley DB $bdb_version in $bdb_place" >&5
+@@ -13371,7 +13584,7 @@ ac_fn_c_check_header_compile "$LINENO" "
+ if eval test \"x\$"$as_ac_Header"\" = x"yes"
+ then :
+ 
+-          if test "3" = "3" -o "3" = "4" -o "3" = "5" -o "3" = "6"; then
++          if test "3" = "3" -o "3" = "4" -o "3" = "5" -o "3" = "6" -o "3" = "18"; then
+             # We generate a separate cache variable for each prefix and libname
+             # we search under.  That way, we avoid caching information that
+             # changes if the user runs `configure' with a different set of
+@@ -13663,10 +13876,10 @@ fi
+ 
+ 
+   if test "x$APRUTIL_LDFLAGS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib\""
+-    APRUTIL_LDFLAGS="-L$found/lib"
++    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib64\""
++    APRUTIL_LDFLAGS="-L$found/lib64"
+   else
+-    apr_addto_bugger="-L$found/lib"
++    apr_addto_bugger="-L$found/lib64"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $APRUTIL_LDFLAGS; do
+@@ -13739,7 +13952,7 @@ fi
+       ;;
+       * )
+         if test -d $bdb_place; then
+-          LDFLAGS="$LDFLAGS -L$bdb_place/lib"
++          LDFLAGS="$LDFLAGS -L$bdb_place/lib64"
+           CPPFLAGS="$CPPFLAGS -I$bdb_place/include"
+         else
+           { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for Berkeley DB $bdb_version in $bdb_place" >&5
+@@ -13772,7 +13985,7 @@ ac_fn_c_check_header_compile "$LINENO" "
+ if eval test \"x\$"$as_ac_Header"\" = x"yes"
+ then :
+ 
+-          if test "2" = "3" -o "2" = "4" -o "2" = "5" -o "2" = "6"; then
++          if test "2" = "3" -o "2" = "4" -o "2" = "5" -o "2" = "6" -o "2" = "18"; then
+             # We generate a separate cache variable for each prefix and libname
+             # we search under.  That way, we avoid caching information that
+             # changes if the user runs `configure' with a different set of
+@@ -14064,10 +14277,10 @@ fi
+ 
+ 
+   if test "x$APRUTIL_LDFLAGS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib\""
+-    APRUTIL_LDFLAGS="-L$found/lib"
++    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib64\""
++    APRUTIL_LDFLAGS="-L$found/lib64"
+   else
+-    apr_addto_bugger="-L$found/lib"
++    apr_addto_bugger="-L$found/lib64"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $APRUTIL_LDFLAGS; do
+@@ -14140,7 +14353,7 @@ fi
+       ;;
+       * )
+         if test -d $bdb_place; then
+-          LDFLAGS="$LDFLAGS -L$bdb_place/lib"
++          LDFLAGS="$LDFLAGS -L$bdb_place/lib64"
+           CPPFLAGS="$CPPFLAGS -I$bdb_place/include"
+         else
+           { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for Berkeley DB $bdb_version in $bdb_place" >&5
+@@ -14173,7 +14386,7 @@ ac_fn_c_check_header_compile "$LINENO" "
+ if eval test \"x\$"$as_ac_Header"\" = x"yes"
+ then :
+ 
+-          if test "1" = "3" -o "1" = "4" -o "1" = "5" -o "1" = "6"; then
++          if test "1" = "3" -o "1" = "4" -o "1" = "5" -o "1" = "6" -o "1" = "18"; then
+             # We generate a separate cache variable for each prefix and libname
+             # we search under.  That way, we avoid caching information that
+             # changes if the user runs `configure' with a different set of
+@@ -14465,10 +14678,10 @@ fi
+ 
+ 
+   if test "x$APRUTIL_LDFLAGS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib\""
+-    APRUTIL_LDFLAGS="-L$found/lib"
++    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib64\""
++    APRUTIL_LDFLAGS="-L$found/lib64"
+   else
+-    apr_addto_bugger="-L$found/lib"
++    apr_addto_bugger="-L$found/lib64"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $APRUTIL_LDFLAGS; do
+@@ -14541,7 +14754,7 @@ fi
+       ;;
+       * )
+         if test -d $bdb_place; then
+-          LDFLAGS="$LDFLAGS -L$bdb_place/lib"
++          LDFLAGS="$LDFLAGS -L$bdb_place/lib64"
+           CPPFLAGS="$CPPFLAGS -I$bdb_place/include"
+         else
+           { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for Berkeley DB $bdb_version in $bdb_place" >&5
+@@ -14574,7 +14787,7 @@ ac_fn_c_check_header_compile "$LINENO" "
+ if eval test \"x\$"$as_ac_Header"\" = x"yes"
+ then :
+ 
+-          if test "1" = "3" -o "1" = "4" -o "1" = "5" -o "1" = "6"; then
++          if test "1" = "3" -o "1" = "4" -o "1" = "5" -o "1" = "6" -o "1" = "18"; then
+             # We generate a separate cache variable for each prefix and libname
+             # we search under.  That way, we avoid caching information that
+             # changes if the user runs `configure' with a different set of
+@@ -14866,10 +15079,10 @@ fi
+ 
+ 
+   if test "x$APRUTIL_LDFLAGS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib\""
+-    APRUTIL_LDFLAGS="-L$found/lib"
++    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib64\""
++    APRUTIL_LDFLAGS="-L$found/lib64"
+   else
+-    apr_addto_bugger="-L$found/lib"
++    apr_addto_bugger="-L$found/lib64"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $APRUTIL_LDFLAGS; do
+@@ -14956,7 +15169,7 @@ printf "%s\n" "not found" >&6; }
+       ;;
+       * )
+         if test -d $bdb_place; then
+-          LDFLAGS="$LDFLAGS -L$bdb_place/lib"
++          LDFLAGS="$LDFLAGS -L$bdb_place/lib64"
+           CPPFLAGS="$CPPFLAGS -I$bdb_place/include"
+         else
+           { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for Berkeley DB $bdb_version in $bdb_place" >&5
+@@ -14989,7 +15202,7 @@ ac_fn_c_check_header_compile "$LINENO" "
+ if eval test \"x\$"$as_ac_Header"\" = x"yes"
+ then :
+ 
+-          if test "1" = "3" -o "1" = "4" -o "1" = "5" -o "1" = "6"; then
++          if test "1" = "3" -o "1" = "4" -o "1" = "5" -o "1" = "6" -o "1" = "18"; then
+             # We generate a separate cache variable for each prefix and libname
+             # we search under.  That way, we avoid caching information that
+             # changes if the user runs `configure' with a different set of
+@@ -15281,10 +15494,10 @@ fi
+ 
+ 
+   if test "x$APRUTIL_LDFLAGS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib\""
+-    APRUTIL_LDFLAGS="-L$found/lib"
++    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib64\""
++    APRUTIL_LDFLAGS="-L$found/lib64"
+   else
+-    apr_addto_bugger="-L$found/lib"
++    apr_addto_bugger="-L$found/lib64"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $APRUTIL_LDFLAGS; do
+@@ -15360,7 +15573,7 @@ fi
+       ;;
+       * )
+         if test -d $bdb_place; then
+-          LDFLAGS="$LDFLAGS -L$bdb_place/lib"
++          LDFLAGS="$LDFLAGS -L$bdb_place/lib64"
+           CPPFLAGS="$CPPFLAGS -I$bdb_place/include"
+         else
+           { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for Berkeley DB $bdb_version in $bdb_place" >&5
+@@ -15393,7 +15606,7 @@ ac_fn_c_check_header_compile "$LINENO" "
+ if eval test \"x\$"$as_ac_Header"\" = x"yes"
+ then :
+ 
+-          if test "1" = "3" -o "1" = "4" -o "1" = "5" -o "1" = "6"; then
++          if test "1" = "3" -o "1" = "4" -o "1" = "5" -o "1" = "6" -o "1" = "18"; then
+             # We generate a separate cache variable for each prefix and libname
+             # we search under.  That way, we avoid caching information that
+             # changes if the user runs `configure' with a different set of
+@@ -15685,10 +15898,10 @@ fi
+ 
+ 
+   if test "x$APRUTIL_LDFLAGS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib\""
+-    APRUTIL_LDFLAGS="-L$found/lib"
++    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib64\""
++    APRUTIL_LDFLAGS="-L$found/lib64"
+   else
+-    apr_addto_bugger="-L$found/lib"
++    apr_addto_bugger="-L$found/lib64"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $APRUTIL_LDFLAGS; do
+@@ -15764,7 +15977,7 @@ fi
+       ;;
+       * )
+         if test -d $bdb_place; then
+-          LDFLAGS="$LDFLAGS -L$bdb_place/lib"
++          LDFLAGS="$LDFLAGS -L$bdb_place/lib64"
+           CPPFLAGS="$CPPFLAGS -I$bdb_place/include"
+         else
+           { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for Berkeley DB $bdb_version in $bdb_place" >&5
+@@ -15797,7 +16010,7 @@ ac_fn_c_check_header_compile "$LINENO" "
+ if eval test \"x\$"$as_ac_Header"\" = x"yes"
+ then :
+ 
+-          if test "2" = "3" -o "2" = "4" -o "2" = "5" -o "2" = "6"; then
++          if test "2" = "3" -o "2" = "4" -o "2" = "5" -o "2" = "6" -o "2" = "18"; then
+             # We generate a separate cache variable for each prefix and libname
+             # we search under.  That way, we avoid caching information that
+             # changes if the user runs `configure' with a different set of
+@@ -16089,10 +16302,10 @@ fi
+ 
+ 
+   if test "x$APRUTIL_LDFLAGS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib\""
+-    APRUTIL_LDFLAGS="-L$found/lib"
++    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib64\""
++    APRUTIL_LDFLAGS="-L$found/lib64"
+   else
+-    apr_addto_bugger="-L$found/lib"
++    apr_addto_bugger="-L$found/lib64"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $APRUTIL_LDFLAGS; do
+@@ -16168,7 +16381,7 @@ fi
+       ;;
+       * )
+         if test -d $bdb_place; then
+-          LDFLAGS="$LDFLAGS -L$bdb_place/lib"
++          LDFLAGS="$LDFLAGS -L$bdb_place/lib64"
+           CPPFLAGS="$CPPFLAGS -I$bdb_place/include"
+         else
+           { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for Berkeley DB $bdb_version in $bdb_place" >&5
+@@ -16201,7 +16414,7 @@ ac_fn_c_check_header_compile "$LINENO" "
+ if eval test \"x\$"$as_ac_Header"\" = x"yes"
+ then :
+ 
+-          if test "3" = "3" -o "3" = "4" -o "3" = "5" -o "3" = "6"; then
++          if test "3" = "3" -o "3" = "4" -o "3" = "5" -o "3" = "6" -o "3" = "18"; then
+             # We generate a separate cache variable for each prefix and libname
+             # we search under.  That way, we avoid caching information that
+             # changes if the user runs `configure' with a different set of
+@@ -16493,10 +16706,10 @@ fi
+ 
+ 
+   if test "x$APRUTIL_LDFLAGS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib\""
+-    APRUTIL_LDFLAGS="-L$found/lib"
++    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib64\""
++    APRUTIL_LDFLAGS="-L$found/lib64"
+   else
+-    apr_addto_bugger="-L$found/lib"
++    apr_addto_bugger="-L$found/lib64"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $APRUTIL_LDFLAGS; do
+@@ -16576,7 +16789,7 @@ fi
+       ;;
+       * )
+         if test -d $bdb_place; then
+-          LDFLAGS="$LDFLAGS -L$bdb_place/lib"
++          LDFLAGS="$LDFLAGS -L$bdb_place/lib64"
+           CPPFLAGS="$CPPFLAGS -I$bdb_place/include"
+         else
+           { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for Berkeley DB $bdb_version in $bdb_place" >&5
+@@ -16609,7 +16822,7 @@ ac_fn_c_check_header_compile "$LINENO" "
+ if eval test \"x\$"$as_ac_Header"\" = x"yes"
+ then :
+ 
+-          if test ""${db_major}"" = "3" -o ""${db_major}"" = "4" -o ""${db_major}"" = "5" -o ""${db_major}"" = "6"; then
++          if test ""${db_major}"" = "3" -o ""${db_major}"" = "4" -o ""${db_major}"" = "5" -o ""${db_major}"" = "6" -o ""${db_major}"" = "18"; then
+             # We generate a separate cache variable for each prefix and libname
+             # we search under.  That way, we avoid caching information that
+             # changes if the user runs `configure' with a different set of
+@@ -16901,10 +17114,10 @@ fi
+ 
+ 
+   if test "x$APRUTIL_LDFLAGS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib\""
+-    APRUTIL_LDFLAGS="-L$found/lib"
++    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib64\""
++    APRUTIL_LDFLAGS="-L$found/lib64"
+   else
+-    apr_addto_bugger="-L$found/lib"
++    apr_addto_bugger="-L$found/lib64"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $APRUTIL_LDFLAGS; do
+@@ -16987,7 +17200,7 @@ fi
+       ;;
+       * )
+         if test -d $bdb_place; then
+-          LDFLAGS="$LDFLAGS -L$bdb_place/lib"
++          LDFLAGS="$LDFLAGS -L$bdb_place/lib64"
+           CPPFLAGS="$CPPFLAGS -I$bdb_place/include"
+         else
+           { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for Berkeley DB $bdb_version in $bdb_place" >&5
+@@ -17020,7 +17233,7 @@ ac_fn_c_check_header_compile "$LINENO" "
+ if eval test \"x\$"$as_ac_Header"\" = x"yes"
+ then :
+ 
+-          if test ""${db_major}"" = "3" -o ""${db_major}"" = "4" -o ""${db_major}"" = "5" -o ""${db_major}"" = "6"; then
++          if test ""${db_major}"" = "3" -o ""${db_major}"" = "4" -o ""${db_major}"" = "5" -o ""${db_major}"" = "6" -o ""${db_major}"" = "18"; then
+             # We generate a separate cache variable for each prefix and libname
+             # we search under.  That way, we avoid caching information that
+             # changes if the user runs `configure' with a different set of
+@@ -17312,10 +17525,10 @@ fi
+ 
+ 
+   if test "x$APRUTIL_LDFLAGS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib\""
+-    APRUTIL_LDFLAGS="-L$found/lib"
++    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib64\""
++    APRUTIL_LDFLAGS="-L$found/lib64"
+   else
+-    apr_addto_bugger="-L$found/lib"
++    apr_addto_bugger="-L$found/lib64"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $APRUTIL_LDFLAGS; do
+@@ -17355,11 +17568,16 @@ fi
+   all_places="$check_places"
+ 
+   # Start version search at version 6.9
+-  db_version=69
++  db_version=181
+   while [ $db_version -ge 40 ]
+   do
+-    db_major=`echo $db_version | sed -e 's/.$//'`
+-    db_minor=`echo $db_version | sed -e 's/.//'`
++    if [ $db_version -ge 100 ]; then
++      db_major=`echo $db_version | sed -e 's/.$//'`
++      db_minor=`echo $db_version | sed -e 's/..//'`
++    else
++      db_major=`echo $db_version | sed -e 's/.$//'`
++      db_minor=`echo $db_version | sed -e 's/.//'`
++    fi
+ 
+   places="$all_places"
+   db_major="$db_major"
+@@ -17407,7 +17625,7 @@ fi
+       ;;
+       * )
+         if test -d $bdb_place; then
+-          LDFLAGS="$LDFLAGS -L$bdb_place/lib"
++          LDFLAGS="$LDFLAGS -L$bdb_place/lib64"
+           CPPFLAGS="$CPPFLAGS -I$bdb_place/include"
+         else
+           { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for Berkeley DB $bdb_version in $bdb_place" >&5
+@@ -17440,7 +17658,7 @@ ac_fn_c_check_header_compile "$LINENO" "
+ if eval test \"x\$"$as_ac_Header"\" = x"yes"
+ then :
+ 
+-          if test ""${db_major}"" = "3" -o ""${db_major}"" = "4" -o ""${db_major}"" = "5" -o ""${db_major}"" = "6"; then
++          if test ""${db_major}"" = "3" -o ""${db_major}"" = "4" -o ""${db_major}"" = "5" -o ""${db_major}"" = "6" -o ""${db_major}"" = "18"; then
+             # We generate a separate cache variable for each prefix and libname
+             # we search under.  That way, we avoid caching information that
+             # changes if the user runs `configure' with a different set of
+@@ -17732,10 +17950,10 @@ fi
+ 
+ 
+   if test "x$APRUTIL_LDFLAGS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib\""
+-    APRUTIL_LDFLAGS="-L$found/lib"
++    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib64\""
++    APRUTIL_LDFLAGS="-L$found/lib64"
+   else
+-    apr_addto_bugger="-L$found/lib"
++    apr_addto_bugger="-L$found/lib64"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $APRUTIL_LDFLAGS; do
+@@ -17812,7 +18030,7 @@ fi
+       ;;
+       * )
+         if test -d $bdb_place; then
+-          LDFLAGS="$LDFLAGS -L$bdb_place/lib"
++          LDFLAGS="$LDFLAGS -L$bdb_place/lib64"
+           CPPFLAGS="$CPPFLAGS -I$bdb_place/include"
+         else
+           { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for Berkeley DB $bdb_version in $bdb_place" >&5
+@@ -17845,7 +18063,7 @@ ac_fn_c_check_header_compile "$LINENO" "
+ if eval test \"x\$"$as_ac_Header"\" = x"yes"
+ then :
+ 
+-          if test "3" = "3" -o "3" = "4" -o "3" = "5" -o "3" = "6"; then
++          if test "3" = "3" -o "3" = "4" -o "3" = "5" -o "3" = "6" -o "3" = "18"; then
+             # We generate a separate cache variable for each prefix and libname
+             # we search under.  That way, we avoid caching information that
+             # changes if the user runs `configure' with a different set of
+@@ -18137,10 +18355,10 @@ fi
+ 
+ 
+   if test "x$APRUTIL_LDFLAGS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib\""
+-    APRUTIL_LDFLAGS="-L$found/lib"
++    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib64\""
++    APRUTIL_LDFLAGS="-L$found/lib64"
+   else
+-    apr_addto_bugger="-L$found/lib"
++    apr_addto_bugger="-L$found/lib64"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $APRUTIL_LDFLAGS; do
+@@ -18213,7 +18431,7 @@ fi
+       ;;
+       * )
+         if test -d $bdb_place; then
+-          LDFLAGS="$LDFLAGS -L$bdb_place/lib"
++          LDFLAGS="$LDFLAGS -L$bdb_place/lib64"
+           CPPFLAGS="$CPPFLAGS -I$bdb_place/include"
+         else
+           { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for Berkeley DB $bdb_version in $bdb_place" >&5
+@@ -18246,7 +18464,7 @@ ac_fn_c_check_header_compile "$LINENO" "
+ if eval test \"x\$"$as_ac_Header"\" = x"yes"
+ then :
+ 
+-          if test "2" = "3" -o "2" = "4" -o "2" = "5" -o "2" = "6"; then
++          if test "2" = "3" -o "2" = "4" -o "2" = "5" -o "2" = "6" -o "2" = "18"; then
+             # We generate a separate cache variable for each prefix and libname
+             # we search under.  That way, we avoid caching information that
+             # changes if the user runs `configure' with a different set of
+@@ -18538,10 +18756,10 @@ fi
+ 
+ 
+   if test "x$APRUTIL_LDFLAGS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib\""
+-    APRUTIL_LDFLAGS="-L$found/lib"
++    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib64\""
++    APRUTIL_LDFLAGS="-L$found/lib64"
+   else
+-    apr_addto_bugger="-L$found/lib"
++    apr_addto_bugger="-L$found/lib64"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $APRUTIL_LDFLAGS; do
+@@ -18614,7 +18832,7 @@ fi
+       ;;
+       * )
+         if test -d $bdb_place; then
+-          LDFLAGS="$LDFLAGS -L$bdb_place/lib"
++          LDFLAGS="$LDFLAGS -L$bdb_place/lib64"
+           CPPFLAGS="$CPPFLAGS -I$bdb_place/include"
+         else
+           { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for Berkeley DB $bdb_version in $bdb_place" >&5
+@@ -18647,7 +18865,7 @@ ac_fn_c_check_header_compile "$LINENO" "
+ if eval test \"x\$"$as_ac_Header"\" = x"yes"
+ then :
+ 
+-          if test "1" = "3" -o "1" = "4" -o "1" = "5" -o "1" = "6"; then
++          if test "1" = "3" -o "1" = "4" -o "1" = "5" -o "1" = "6" -o "1" = "18"; then
+             # We generate a separate cache variable for each prefix and libname
+             # we search under.  That way, we avoid caching information that
+             # changes if the user runs `configure' with a different set of
+@@ -18939,10 +19157,10 @@ fi
+ 
+ 
+   if test "x$APRUTIL_LDFLAGS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib\""
+-    APRUTIL_LDFLAGS="-L$found/lib"
++    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib64\""
++    APRUTIL_LDFLAGS="-L$found/lib64"
+   else
+-    apr_addto_bugger="-L$found/lib"
++    apr_addto_bugger="-L$found/lib64"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $APRUTIL_LDFLAGS; do
+@@ -19015,7 +19233,7 @@ fi
+       ;;
+       * )
+         if test -d $bdb_place; then
+-          LDFLAGS="$LDFLAGS -L$bdb_place/lib"
++          LDFLAGS="$LDFLAGS -L$bdb_place/lib64"
+           CPPFLAGS="$CPPFLAGS -I$bdb_place/include"
+         else
+           { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for Berkeley DB $bdb_version in $bdb_place" >&5
+@@ -19048,7 +19266,7 @@ ac_fn_c_check_header_compile "$LINENO" "
+ if eval test \"x\$"$as_ac_Header"\" = x"yes"
+ then :
+ 
+-          if test "1" = "3" -o "1" = "4" -o "1" = "5" -o "1" = "6"; then
++          if test "1" = "3" -o "1" = "4" -o "1" = "5" -o "1" = "6" -o "1" = "18"; then
+             # We generate a separate cache variable for each prefix and libname
+             # we search under.  That way, we avoid caching information that
+             # changes if the user runs `configure' with a different set of
+@@ -19340,10 +19558,10 @@ fi
+ 
+ 
+   if test "x$APRUTIL_LDFLAGS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib\""
+-    APRUTIL_LDFLAGS="-L$found/lib"
++    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$found/lib64\""
++    APRUTIL_LDFLAGS="-L$found/lib64"
+   else
+-    apr_addto_bugger="-L$found/lib"
++    apr_addto_bugger="-L$found/lib64"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $APRUTIL_LDFLAGS; do
+@@ -19956,7 +20174,7 @@ fi
+         pgsql_LDFLAGS="-L`$PGSQL_CONFIG --libdir`"
+       else
+         pgsql_CPPFLAGS="-I$withval/include"
+-        pgsql_LDFLAGS="-L$withval/lib "
++        pgsql_LDFLAGS="-L$withval/lib64 "
+       fi
+ 
+ 
+@@ -21055,7 +21273,7 @@ fi
+         fi
+       else
+         mysql_CPPFLAGS="-I$withval/include"
+-        mysql_LDFLAGS="-L$withval/lib "
++        mysql_LDFLAGS="-L$withval/lib64 "
+       fi
+ 
+ 
+@@ -21357,7 +21575,7 @@ done
+       :
+     else
+       sqlite3_CPPFLAGS="-I$withval/include"
+-      sqlite3_LDFLAGS="-L$withval/lib "
++      sqlite3_LDFLAGS="-L$withval/lib64 "
+ 
+ 
+   if test "x$CPPFLAGS" = "x"; then
+@@ -21630,7 +21848,7 @@ done
+       :
+     else
+       sqlite2_CPPFLAGS="-I$withval/include"
+-      sqlite2_LDFLAGS="-L$withval/lib "
++      sqlite2_LDFLAGS="-L$withval/lib64 "
+ 
+ 
+   if test "x$CPPFLAGS" = "x"; then
+@@ -22134,7 +22352,7 @@ done
+       else
+         oracle_CPPFLAGS="-I$withval/rdbms/demo -I$withval/rdbms/public"
+       fi
+-      oracle_LDFLAGS="-L$withval/lib "
++      oracle_LDFLAGS="-L$withval/lib64 "
+ 
+ 
+   if test "x$CPPFLAGS" = "x"; then
+@@ -22383,7 +22601,7 @@ fi
+ 
+ done
+       if test "$apu_have_oracle" != "0"; then
+-        oracle_LDFLAGS="$oracle_LDFLAGS -R$withval/lib"
++        oracle_LDFLAGS="$oracle_LDFLAGS -R$withval/lib64"
+         if test -z "$with_oracle_include"; then
+ 
+   if test "x$APRUTIL_PRIV_INCLUDES" = "x"; then
+@@ -22775,7 +22993,7 @@ fi
+           odbc_LIBS="`$withval --libs`"
+         else
+           odbc_CPPFLAGS="-I$withval/include"
+-          odbc_LDFLAGS="-L$withval/lib "
++          odbc_LDFLAGS="-L$withval/lib64 "
+         fi
+       fi
+ 
+@@ -23275,10 +23493,10 @@ then :
+     if test "$withval" != "/usr"; then
+ 
+   if test "x$LDFLAGS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting LDFLAGS to \"-L$withval/lib\""
+-    LDFLAGS="-L$withval/lib"
++    test "x$silent" != "xyes" && echo "  setting LDFLAGS to \"-L$withval/lib64\""
++    LDFLAGS="-L$withval/lib64"
+   else
+-    apr_addto_bugger="-L$withval/lib"
++    apr_addto_bugger="-L$withval/lib64"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $LDFLAGS; do
+@@ -23338,10 +23556,10 @@ then :
+ 
+ 
+   if test "x$APRUTIL_LDFLAGS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$withval/lib\""
+-    APRUTIL_LDFLAGS="-L$withval/lib"
++    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$withval/lib64\""
++    APRUTIL_LDFLAGS="-L$withval/lib64"
+   else
+-    apr_addto_bugger="-L$withval/lib"
++    apr_addto_bugger="-L$withval/lib64"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $APRUTIL_LDFLAGS; do
+@@ -23571,10 +23789,10 @@ fi
+   if test $apu_has_expat = 0; then
+ 
+   if test "x$LDFLAGS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting LDFLAGS to \"-L/usr/local/lib\""
+-    LDFLAGS="-L/usr/local/lib"
++    test "x$silent" != "xyes" && echo "  setting LDFLAGS to \"-L/usr/local/lib64\""
++    LDFLAGS="-L/usr/local/lib64"
+   else
+-    apr_addto_bugger="-L/usr/local/lib"
++    apr_addto_bugger="-L/usr/local/lib64"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $LDFLAGS; do
+@@ -23677,10 +23895,10 @@ printf "%s\n" "#define HAVE_EXPAT_H 1" >
+ 
+ 
+   if test "x$APRUTIL_LDFLAGS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L/usr/local/lib\""
+-    APRUTIL_LDFLAGS="-L/usr/local/lib"
++    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L/usr/local/lib64\""
++    APRUTIL_LDFLAGS="-L/usr/local/lib64"
+   else
+-    apr_addto_bugger="-L/usr/local/lib"
++    apr_addto_bugger="-L/usr/local/lib64"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $APRUTIL_LDFLAGS; do
+@@ -23700,21 +23918,21 @@ else
+    apu_has_expat=0
+ 
+ 
+-  if test "x$LDFLAGS" = "x-L/usr/local/lib"; then
++  if test "x$LDFLAGS" = "x-L/usr/local/lib64"; then
+     test "x$silent" != "xyes" && echo "  nulling LDFLAGS"
+     LDFLAGS=""
+   else
+     apr_new_bugger=""
+     apr_removed=0
+     for i in $LDFLAGS; do
+-      if test "x$i" != "x-L/usr/local/lib"; then
++      if test "x$i" != "x-L/usr/local/lib64"; then
+         apr_new_bugger="$apr_new_bugger $i"
+       else
+         apr_removed=1
+       fi
+     done
+     if test $apr_removed = "1"; then
+-      test "x$silent" != "xyes" && echo "  removed \"-L/usr/local/lib\" from LDFLAGS"
++      test "x$silent" != "xyes" && echo "  removed \"-L/usr/local/lib64\" from LDFLAGS"
+       LDFLAGS=$apr_new_bugger
+     fi
+   fi
+@@ -23833,10 +24051,10 @@ then :
+ 
+ 
+   if test "x$APRUTIL_LIBS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting APRUTIL_LIBS to \"$apu_iconv_dir/lib/libapriconv-1.la\""
+-    APRUTIL_LIBS="$apu_iconv_dir/lib/libapriconv-1.la"
++    test "x$silent" != "xyes" && echo "  setting APRUTIL_LIBS to \"$apu_iconv_dir/lib64/libapriconv-1.la\""
++    APRUTIL_LIBS="$apu_iconv_dir/lib64/libapriconv-1.la"
+   else
+-    apr_addto_bugger="$apu_iconv_dir/lib/libapriconv-1.la"
++    apr_addto_bugger="$apu_iconv_dir/lib64/libapriconv-1.la"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $APRUTIL_LIBS; do
+@@ -23880,10 +24098,10 @@ printf "%s\n" "using apr-iconv" >&6; }
+ 
+ 
+   if test "x$LDFLAGS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting LDFLAGS to \"-L$apu_iconv_dir/lib\""
+-    LDFLAGS="-L$apu_iconv_dir/lib"
++    test "x$silent" != "xyes" && echo "  setting LDFLAGS to \"-L$apu_iconv_dir/lib64\""
++    LDFLAGS="-L$apu_iconv_dir/lib64"
+   else
+-    apr_addto_bugger="-L$apu_iconv_dir/lib"
++    apr_addto_bugger="-L$apu_iconv_dir/lib64"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $LDFLAGS; do
+@@ -24087,21 +24305,21 @@ if test "$want_iconv" = "1" -a "$apu_ico
+   fi
+ 
+ 
+-  if test "x$LDFLAGS" = "x-L$apu_iconv_dir/lib"; then
++  if test "x$LDFLAGS" = "x-L$apu_iconv_dir/lib64"; then
+     test "x$silent" != "xyes" && echo "  nulling LDFLAGS"
+     LDFLAGS=""
+   else
+     apr_new_bugger=""
+     apr_removed=0
+     for i in $LDFLAGS; do
+-      if test "x$i" != "x-L$apu_iconv_dir/lib"; then
++      if test "x$i" != "x-L$apu_iconv_dir/lib64"; then
+         apr_new_bugger="$apr_new_bugger $i"
+       else
+         apr_removed=1
+       fi
+     done
+     if test $apr_removed = "1"; then
+-      test "x$silent" != "xyes" && echo "  removed \"-L$apu_iconv_dir/lib\" from LDFLAGS"
++      test "x$silent" != "xyes" && echo "  removed \"-L$apu_iconv_dir/lib64\" from LDFLAGS"
+       LDFLAGS=$apr_new_bugger
+     fi
+   fi
+@@ -24129,10 +24347,10 @@ if test "$want_iconv" = "1" -a "$apu_ico
+ 
+ 
+   if test "x$APRUTIL_LDFLAGS" = "x"; then
+-    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$apu_iconv_dir/lib\""
+-    APRUTIL_LDFLAGS="-L$apu_iconv_dir/lib"
++    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$apu_iconv_dir/lib64\""
++    APRUTIL_LDFLAGS="-L$apu_iconv_dir/lib64"
+   else
+-    apr_addto_bugger="-L$apu_iconv_dir/lib"
++    apr_addto_bugger="-L$apu_iconv_dir/lib64"
+     for i in $apr_addto_bugger; do
+       apr_addto_duplicate="0"
+       for j in $APRUTIL_LDFLAGS; do
+@@ -24162,10 +24380,7 @@ if test "x$apu_iconv_inbuf_const" = "x";
+  fi
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+ /* end confdefs.h.  */
+-
+-#ifndef PACKAGE_NAME
+ #include "confdefs.h"
+-#endif
+ 
+ 
+     #include <stddef.h>
+@@ -24408,6 +24623,8 @@ printf "%s\n" "#define APU_DSO_BUILD $ap
+ 
+ 
+ 
++save_LIBS="$LIBS"
++LIBS=
+ { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing crypt" >&5
+ printf %s "checking for library containing crypt... " >&6; }
+ if test ${ac_cv_search_crypt+y}
+@@ -24467,6 +24684,49 @@ then :
+ 
+ fi
+ 
++
++  if test "x$APRUTIL_EXPORT_LIBS" = "x"; then
++    test "x$silent" != "xyes" && echo "  setting APRUTIL_EXPORT_LIBS to \"$LIBS\""
++    APRUTIL_EXPORT_LIBS="$LIBS"
++  else
++    apr_addto_bugger="$LIBS"
++    for i in $apr_addto_bugger; do
++      apr_addto_duplicate="0"
++      for j in $APRUTIL_EXPORT_LIBS; do
++        if test "x$i" = "x$j"; then
++          apr_addto_duplicate="1"
++          break
++        fi
++      done
++      if test $apr_addto_duplicate = "0"; then
++        test "x$silent" != "xyes" && echo "  adding \"$i\" to APRUTIL_EXPORT_LIBS"
++        APRUTIL_EXPORT_LIBS="$APRUTIL_EXPORT_LIBS $i"
++      fi
++    done
++  fi
++
++
++  if test "x$APRUTIL_LIBS" = "x"; then
++    test "x$silent" != "xyes" && echo "  setting APRUTIL_LIBS to \"$LIBS\""
++    APRUTIL_LIBS="$LIBS"
++  else
++    apr_addto_bugger="$LIBS"
++    for i in $apr_addto_bugger; do
++      apr_addto_duplicate="0"
++      for j in $APRUTIL_LIBS; do
++        if test "x$i" = "x$j"; then
++          apr_addto_duplicate="1"
++          break
++        fi
++      done
++      if test $apr_addto_duplicate = "0"; then
++        test "x$silent" != "xyes" && echo "  adding \"$i\" to APRUTIL_LIBS"
++        APRUTIL_LIBS="$APRUTIL_LIBS $i"
++      fi
++    done
++  fi
++
++LIBS="$save_LIBS $LIBS"
+ case "$ac_cv_search_crypt" in
+ "no"|"none required")
+     ;;
+@@ -25352,9 +25612,9 @@ esac
+ 
+ cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
+ # Files that config.status was made for.
+-config_files="$ac_config_files"
+-config_headers="$ac_config_headers"
+-config_commands="$ac_config_commands"
++config_files="`echo $ac_config_files`"
++config_headers="`echo $ac_config_headers`"
++config_commands="`echo $ac_config_commands`"
+ 
+ _ACEOF
+ 
