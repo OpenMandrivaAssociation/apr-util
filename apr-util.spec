@@ -22,7 +22,7 @@ Version:	1.6.3
 Release:	2
 License:	Apache License
 Group:		System/Libraries
-Url:		http://apr.apache.org/
+Url:		https://apr.apache.org/
 Source0:	http://www.apache.org/dist/apr/apr-util-%{version}.tar.bz2
 Source1:	http://www.apache.org/dist/apr/apr-util-%{version}.tar.bz2.asc
 Patch0:		apr-util-1.2.2-config.diff
