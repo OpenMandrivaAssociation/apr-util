@@ -31,6 +31,11 @@ Patch2:		apr-util-1.3.12-linkage_fix.diff
 Patch3:		apr-util-1.5.1-no-libtool.la.patch
 Patch4:		apr-util-1.6.3-db-18.x.patch
 
+BuildRequires:	autoconf
+BuildRequires:	automake
+BuildRequires:	libtool-base
+BuildRequires:	slibtool
+BuildRequires:	make
 BuildRequires:	doxygen
 BuildRequires:	libtool
 BuildRequires:	python
