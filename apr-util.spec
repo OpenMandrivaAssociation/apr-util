@@ -19,7 +19,7 @@
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
 Version:	1.6.3
-Release:	2
+Release:	3
 License:	Apache License
 Group:		System/Libraries
 Url:		https://apr.apache.org/
@@ -33,11 +33,9 @@ Patch4:		apr-util-1.6.3-db-18.x.patch
 
 BuildRequires:	autoconf
 BuildRequires:	automake
-BuildRequires:	libtool-base
 BuildRequires:	slibtool
 BuildRequires:	make
 BuildRequires:	doxygen
-BuildRequires:	libtool
 BuildRequires:	python
 BuildRequires:	pam-devel
 BuildRequires:	readline-devel
@@ -270,7 +268,7 @@ perl -pi -e "s|/lib\b|/%{_lib}|g" build/*.m4
 
 export WANT_AUTOCONF_2_5=1
 rm -f configure
-libtoolize --copy --force; aclocal; autoconf --force
+slibtoolize --copy --force; aclocal; autoconf --force
 python build/gen-build.py make
 
 sed -i -e '/OBJECTS_all/s, dbd/apr_dbd_[^ ]*\.lo,,g' build-outputs.mk
@@ -324,7 +322,7 @@ EOF
 # where stuff is going wrong in abf
 cat config.log
 
-%make_build
+%make_build LIBTOOL=slibtool-shared LDFLAGS="-lapr-1"
 make dox
 
 %check
@@ -334,13 +332,7 @@ cd test
 cd -
 
 %install
-%make_install
-
-# Remove unnecessary exports from dependency_libs
-sed -ri '/^dependency_libs/{s,-l(pq|sqlite[0-9]|mysqlclient_r|rt|dl|uuid) ,,g}' %{buildroot}%{_libdir}/libapr*.la
-
-# here as well
-sed -ri '/^dependency_libs/{s,%{_libdir}/lib(sqlite[0-9]|mysqlclient_r)\.la ,,g}' %{buildroot}%{_libdir}/libapr*.la
+%make_install LIBTOOL=slibtool-shared
 
 # multiarch anti-borker
 perl -pi -e "s|^LDFLAGS=.*|LDFLAGS=\"\"|g" %{buildroot}%{_bindir}/apu-%{api}-config
