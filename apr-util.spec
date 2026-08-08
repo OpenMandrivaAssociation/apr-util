@@ -18,18 +18,18 @@
 
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
-Version:	1.6.3
-Release:	2
+Version:	1.6.4
+Release:	1
 License:	Apache License
 Group:		System/Libraries
 Url:		https://apr.apache.org/
-Source0:	http://www.apache.org/dist/apr/apr-util-%{version}.tar.bz2
-Source1:	http://www.apache.org/dist/apr/apr-util-%{version}.tar.bz2.asc
+Source0:	https://www.apache.org/dist/apr/apr-util-%{version}.tar.bz2
+Source1:	https://www.apache.org/dist/apr/apr-util-%{version}.tar.bz2.asc
 Patch0:		apr-util-1.2.2-config.diff
 Patch1:		apr-util-1.2.7-link.diff
 Patch2:		apr-util-1.3.12-linkage_fix.diff
 Patch3:		apr-util-1.5.1-no-libtool.la.patch
-Patch4:		apr-util-1.6.3-db-18.x.patch
+Patch4:		apr-util-1.6.4-db-18.x.patch
 
 BuildRequires:	doxygen
 BuildRequires:	libtool
