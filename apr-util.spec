@@ -18,18 +18,18 @@
 
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
-Version:	1.6.3
-Release:	4
+Version:	1.6.4
+Release:	1
 License:	Apache License
 Group:		System/Libraries
 Url:		https://apr.apache.org/
-Source0:	http://www.apache.org/dist/apr/apr-util-%{version}.tar.bz2
-Source1:	http://www.apache.org/dist/apr/apr-util-%{version}.tar.bz2.asc
+Source0:	https://www.apache.org/dist/apr/apr-util-%{version}.tar.bz2
+Source1:	https://www.apache.org/dist/apr/apr-util-%{version}.tar.bz2.asc
 Patch0:		apr-util-1.2.2-config.diff
 Patch1:		apr-util-1.2.7-link.diff
 Patch2:		apr-util-1.3.12-linkage_fix.diff
 Patch3:		apr-util-1.5.1-no-libtool.la.patch
-Patch4:		apr-util-1.6.3-db-18.x.patch
+Patch4:		apr-util-1.6.4-db-18.x.patch
 
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -37,8 +37,8 @@ BuildRequires:	slibtool
 BuildRequires:	make
 BuildRequires:	doxygen
 BuildRequires:	python
-BuildRequires:	pam-devel
-BuildRequires:	readline-devel
+BuildRequires:	pkgconfig(pam)
+BuildRequires:	pkgconfig(readline)
 BuildRequires:	pkgconfig(apr-1)
 BuildRequires:	pkgconfig(python3)
 BuildRequires:	pkgconfig(expat)
@@ -57,19 +57,19 @@ BuildRequires:	freetds-devel
 Obsoletes:	%{name}-dbd-freetds < %{EVRD}
 %endif
 %if %{with dbd_mysql}
-BuildRequires:	mysql-devel
+BuildRequires:	pkgconfig(libmariadb)
 %endif
 %if %{with dbd_oracle}
 BuildRequires:	oracle-devel
 %endif
 %if %{with dbd_psql}
-BuildRequires:	postgresql-devel
+BuildRequires:	pkgconfig(libpq)
 %endif
 %if %{with dbd_sqlite3}
-BuildRequires:	sqlite3-devel
+BuildRequires:	pkgconfig(sqlite3)
 %endif
 %if %{with dbd_odbc}
-BuildRequires:	unixODBC-devel
+BuildRequires:	pkgconfig(odbc)
 %endif
 %if %{with dbm_db}
 BuildRequires:	db-devel >= 18.1
@@ -118,7 +118,7 @@ You can build %{name} with some conditional build swithes;
 Summary:	DBD driver for OpenLDAP
 Group:		System/Libraries
 License:	Apache License
-Requires:	%{libname} >= %{version}-%{release}
+Requires:	%{libname} = %{EVRD}
 
 %description	dbd-ldap
 DBD driver for OpenLDAP.
@@ -129,7 +129,7 @@ DBD driver for OpenLDAP.
 Summary:	DBD driver for PostgreSQL
 Group:		System/Libraries
 License:	Apache License
-Requires:	%{libname} >= %{version}-%{release}
+Requires:	%{libname} = %{EVRD}
 
 %description	dbd-pgsql
 DBD driver for PostgreSQL.
@@ -140,7 +140,7 @@ DBD driver for PostgreSQL.
 Summary:	DBD driver for MySQL
 Group:		System/Libraries
 License:	Apache License
-Requires:	%{libname} >= %{version}-%{release}
+Requires:	%{libname} = %{EVRD}
 
 %description	dbd-mysql
 DBD driver for MySQL.
@@ -151,7 +151,7 @@ DBD driver for MySQL.
 Summary:	DBD driver for SQLite 3
 Group:		System/Libraries
 License:	Apache License
-Requires:	%{libname} >= %{version}-%{release}
+Requires:	%{libname} = %{EVRD}
 
 %description	dbd-sqlite3
 DBD driver for SQLite 3.
@@ -162,7 +162,7 @@ DBD driver for SQLite 3.
 Summary:	DBD driver for FreeTDS
 Group:		System/Libraries
 License:	Apache License
-Requires:	%{libname} >= %{version}-%{release}
+Requires:	%{libname} = %{EVRD}
 
 %description	dbd-freetds
 DBD driver for FreeTDS.
@@ -173,7 +173,7 @@ DBD driver for FreeTDS.
 Summary:	DBD driver for Oracle
 Group:		System/Libraries
 License:	Apache License
-Requires:	%{libname} >= %{version}-%{release}
+Requires:	%{libname} = %{EVRD}
 
 %description	dbd-oracle
 DBD driver for Oracle.
@@ -184,7 +184,7 @@ DBD driver for Oracle.
 Summary:	DBD driver for unixODBC
 Group:		System/Libraries
 License:	Apache License
-Requires:	%{libname} >= %{version}-%{release}
+Requires:	%{libname} = %{EVRD}
 
 %description	dbd-odbc
 DBD driver for unixODBC.
@@ -195,7 +195,7 @@ DBD driver for unixODBC.
 Summary:	DBD driver for Berkley BD
 Group:		System/Libraries
 License:	Apache License
-Requires:	%{libname} >= %{version}-%{release}
+Requires:	%{libname} = %{EVRD}
 
 %description	dbm-db
 DBD driver for Berkley BD.
@@ -204,7 +204,7 @@ DBD driver for Berkley BD.
 %package	openssl
 Summary:	APR utility library OpenSSL crypto support
 Group:		System/Libraries
-Requires:	%{libname} >= %{version}-%{release}
+Requires:	%{libname} = %{EVRD}
 
 %description	openssl
 This package provides the OpenSSL crypto support for apr-util.
@@ -212,7 +212,7 @@ This package provides the OpenSSL crypto support for apr-util.
 %package	nss
 Summary:	APR utility library NSS crypto support
 Group:		System/Libraries
-Requires:	%{libname} >= %{version}-%{release}
+Requires:	%{libname} = %{EVRD}
 
 %description	nss
 This package provides the NSS crypto support for apr-util.
@@ -220,8 +220,8 @@ This package provides the NSS crypto support for apr-util.
 %package -n	%{devname}
 Summary:	APR utility library development kit
 Group:		Development/C
-Requires:	%{libname} >= %{version}-%{release}
-Provides:	%{name}-devel = %{version}-%{release}
+Requires:	%{libname} = %{EVRD}
+Provides:	%{name}-devel = %{EVRD}
 
 %description -n	%{devname}
 This package provides the support files which can be used to 
