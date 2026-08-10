@@ -18,7 +18,7 @@
 
 Summary:	Apache Portable Runtime Utility library
 Name:		apr-util
-Version:	1.6.4
+Version:	1.6.5
 Release:	1
 License:	Apache License
 Group:		System/Libraries
@@ -29,7 +29,7 @@ Patch0:		apr-util-1.2.2-config.diff
 Patch1:		apr-util-1.2.7-link.diff
 Patch2:		apr-util-1.3.12-linkage_fix.diff
 Patch3:		apr-util-1.5.1-no-libtool.la.patch
-Patch4:		apr-util-1.6.4-db-18.x.patch
+Patch4:		apr-util-1.6.5-db-18.x.patch
 
 BuildRequires:	autoconf
 BuildRequires:	automake

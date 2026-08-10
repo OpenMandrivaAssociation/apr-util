@@ -1,6 +1,6 @@
-diff -up apr-util-1.6.4/build/dbm.m4.db18 apr-util-1.6.4/build/dbm.m4
---- apr-util-1.6.4/build/dbm.m4.db18	2023-02-03 17:36:17.000000000 +0100
-+++ apr-util-1.6.4/build/dbm.m4	2026-08-08 15:13:31.000000000 +0200
+diff -up apr-util-1.6.5/build/dbm.m4.db18 apr-util-1.6.5/build/dbm.m4
+--- apr-util-1.6.5/build/dbm.m4.db18	2023-02-03 17:36:17.000000000 +0100
++++ apr-util-1.6.5/build/dbm.m4	2026-08-10 22:38:40.000000000 +0200
 @@ -112,7 +112,7 @@ AC_DEFUN([APU_CHECK_BERKELEY_DB], [
          changequote([,])
          unset $cache_id
