@@ -24,7 +24,6 @@ License:	Apache License
 Group:		System/Libraries
 Url:		https://apr.apache.org/
 Source0:	https://www.apache.org/dist/apr/apr-util-%{version}.tar.bz2
-Source1:	https://www.apache.org/dist/apr/apr-util-%{version}.tar.bz2.asc
 Patch0:		apr-util-1.2.2-config.diff
 Patch1:		apr-util-1.2.7-link.diff
 Patch2:		apr-util-1.3.12-linkage_fix.diff
